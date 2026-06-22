@@ -1,0 +1,15 @@
+{
+  "age_mean": 62.71,
+  "age_std": 13.542425827646143,
+  "male_proportion": 0.509,
+  "log_scr_mean": 0.0634426134583113,
+  "log_scr_var": 0.03538076922369707,
+  "age_to_scr_slope": 0.003297696114941619,
+  "age_to_scr_intercept": -0.14335590990967753,
+  "p_vanco_given_normal": 0.3418181818181818,
+  "p_vanco_given_elderly": 0.5044444444444445,
+  "p_zosyn": 0.389,
+  "aki_rate_vanco_zosyn": 0.4968152866242038,
+  "aki_rate_vanco_only": 0.18992248062015504,
+  "aki_rate_baseline": 0.07365439093484419
+}

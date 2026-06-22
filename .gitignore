@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Trained model weights (too large for git — download separately)
+models/
+
+# Intermediate validation outputs (reproducible via scripts)
+output_dp/
+output_non_dp/
+plots_dp/
+plots_non_dp/

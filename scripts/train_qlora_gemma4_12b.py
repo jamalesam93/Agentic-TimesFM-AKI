@@ -23,7 +23,18 @@ from __future__ import annotations
 
 import argparse
 import sys
+import os
 from pathlib import Path
+
+# Disable JIT/Dynamo recompilation checks and Unsloth graph compile overhead
+os.environ["UNSLOTH_COMPILE_DISABLE"] = "1"
+os.environ["TORCHDYNAMO_DISABLE"] = "1"
+
+try:
+    import torch
+    torch._dynamo.config.cache_size_limit = 256
+except Exception:
+    pass
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = SCRIPT_DIR.parent

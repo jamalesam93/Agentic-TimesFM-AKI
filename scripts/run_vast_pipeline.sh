@@ -174,10 +174,9 @@ if [ "${SKIP_GGUF:-0}" -ne 1 ]; then
 
     # Wait for server to be responsive
     echo "  -> Waiting for server to initialize..."
-    for i in {1..30}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/health" || \
-           curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/" | grep -q "200" || \
-           curl -s -o /dev/null "http://127.0.0.1:$PORT/v1/models"; then
+    for i in {1..45}; do
+        STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/health" || echo "000")
+        if [ "$STATUS_CODE" -eq 200 ]; then
             echo "  -> Server is ready!"
             break
         fi

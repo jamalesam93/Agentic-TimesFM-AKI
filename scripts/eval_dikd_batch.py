@@ -34,7 +34,7 @@ except ImportError:
     print("Install requests: pip install requests", file=sys.stderr)
     raise SystemExit(1)
 
-LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL)\]")
+LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL|AKI_IMMINENT)\]")
 
 
 def chat_completion(
@@ -63,7 +63,12 @@ def chat_completion(
 
 def extract_label(text: str) -> str | None:
     m = LABEL_RE.search(text)
-    return m.group(1) if m else None
+    if m:
+        label = m.group(1)
+        if label == "AKI_IMMINENT":
+            return "AKI_STAGE_1+"
+        return label
+    return None
 
 
 def main() -> int:

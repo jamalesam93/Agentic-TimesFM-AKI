@@ -20,20 +20,16 @@ from trl import SFTTrainer
 #   1. Rent an instance with an NVIDIA A100 (40 GB) or RTX 4090 (24 GB).
 #      Search template: PyTorch 2.x, CUDA 12.x, Ubuntu 22.04.
 #
-#   2. SSH into the instance and install dependencies:
+#   2. SSH into the instance, clone the repo, and install dependencies:
+#        git clone https://github.com/jamalesam93/AKI-training.git
+#        cd AKI-training
 #        pip install torch transformers datasets peft trl bitsandbytes accelerate
 #
-#   3. Upload the training data:
-#        scp output/dikd_training_data_10k.jsonl root@<vast-ip>:~/data/
-#
-#   4. Upload this script:
-#        scp src/hyperparameter_tuning.py root@<vast-ip>:~/
-#
-#   5. (Optional) If the model is gated, authenticate:
+#   3. (Optional) If the model is gated, authenticate:
 #        huggingface-cli login
 #
-#   6. Run training:
-#        python hyperparameter_tuning.py
+#   4. Run training:
+#        python src/hyperparameter_tuning.py
 #
 # ─── MEMORY BUDGET (4-bit QLoRA on A100 40 GB) ──────────────────────────────
 #
@@ -52,7 +48,7 @@ def execute_training():
     # 1. CONFIGURATION
     # =========================================================================
     model_id = "google/gemma-4-12b-it"
-    dataset_path = "data/dikd_training_data_10k.jsonl"  # Path on the Vast.ai instance
+    dataset_path = "output/dikd_training_data_10k.jsonl"  # Relative to repo root
     output_dir = "models/dikd-gemma4-12b-lora"
 
     print("=" * 65)

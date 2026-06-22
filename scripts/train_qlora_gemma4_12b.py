@@ -34,8 +34,8 @@ MAX_SEQ_LENGTH = 512               # DIKD trajectories are ~350 tokens
 LORA_R = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.05
-BATCH_SIZE = 4
-GRAD_ACCUM = 4                     # Effective batch = 16
+BATCH_SIZE = 2
+GRAD_ACCUM = 8                     # Effective batch = 16
 NUM_EPOCHS = 2
 LEARNING_RATE = 1e-4
 
@@ -115,6 +115,7 @@ def train_with_unsloth(
         report_to="none",
         save_strategy="no",
         eval_strategy="no",
+        gradient_checkpointing=True,
     )
 
     trainer = SFTTrainer(
@@ -227,6 +228,7 @@ def train_with_peft(
         report_to="none",
         save_strategy="no",
         eval_strategy="no",
+        gradient_checkpointing=True,
     )
 
     trainer = SFTTrainer(

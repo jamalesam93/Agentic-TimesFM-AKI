@@ -18,7 +18,7 @@
 #   bash scripts/run_mimic_eval.sh
 #
 # Environment variables:
-#   HF_REPO          # HF repo with GGUF  (default: jamalesam93/gemma-4-12b-it-aki-sentinel)
+#   HF_REPO          # HF repo with GGUF  (default: QinEmPeRoR93/gemma-4-12b-it-aki-sentinel)
 #   GGUF_FILENAME    # GGUF file to download (default: dikd-gemma4-12b-q6_k.gguf)
 #   LLAMA_CPP_PATH   # Path to llama.cpp   (default: ~/llama.cpp)
 #   PORT             # Server port          (default: 1234)
@@ -30,7 +30,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-HF_REPO="${HF_REPO:-jamalesam93/gemma-4-12b-it-aki-sentinel}"
+HF_REPO="${HF_REPO:-QinEmPeRoR93/gemma-4-12b-it-aki-sentinel}"
 GGUF_FILENAME="${GGUF_FILENAME:-dikd-gemma4-12b-q6_k.gguf}"
 LLAMA_CPP_DIR="${LLAMA_CPP_PATH:-$HOME/llama.cpp}"
 PORT="${PORT:-1234}"

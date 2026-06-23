@@ -24,6 +24,11 @@ Thumbs.db
 
 # Trained model weights (too large for git — download separately)
 models/
+outputs/
+exports/
+
+# MIMIC-IV clinical data (PhysioNet license — do NOT commit)
+mimic-iv-clinical-database-demo-2.2/
 
 # Intermediate validation outputs (reproducible via scripts)
 output_dp/

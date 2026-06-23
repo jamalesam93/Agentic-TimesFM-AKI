@@ -1,0 +1,15 @@
+{
+  "total": 117,
+  "accuracy": 0.9402,
+  "sensitivity": 0.7,
+  "specificity": 1.0,
+  "precision": 1.0,
+  "f1": 0.8235,
+  "parse_rate": 0.9658,
+  "confusion": {
+    "tp": 7,
+    "fp": 0,
+    "tn": 103,
+    "fn": 3
+  }
+}

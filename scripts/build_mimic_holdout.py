@@ -266,6 +266,7 @@ def build_trajectory(
     trajectory_days = []
     last_known_scr = baseline_scr
     cumulative_vanco_trough = 0.0
+    had_aki = False
 
     for day_num in range(1, n_days + 1):
         day_start = icu_intime + timedelta(days=day_num - 1)
@@ -298,8 +299,11 @@ def build_trajectory(
             cumulative_vanco_trough = 0.0  # No trough measured yet
 
         # KDIGO AKI classification
-        risk_label = "NORMAL"
         if scr_val >= baseline_scr * 1.5:
+            had_aki = True
+
+        risk_label = "NORMAL"
+        if had_aki:
             risk_label = "AKI_STAGE_1+"
 
         trajectory_days.append({

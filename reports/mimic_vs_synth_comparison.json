@@ -1,0 +1,64 @@
+{
+  "mimic_iv": {
+    "total": 117,
+    "accuracy": 0.9402,
+    "sensitivity": 0.7,
+    "specificity": 1.0,
+    "precision": 1.0,
+    "f1": 0.8235,
+    "parse_rate": 0.9658,
+    "confusion": {
+      "tp": 7,
+      "fp": 0,
+      "tn": 103,
+      "fn": 3
+    }
+  },
+  "synthetic": {
+    "total": 200,
+    "accuracy": 1.0,
+    "sensitivity": 1.0,
+    "specificity": 1.0,
+    "precision": 1.0,
+    "f1": 1.0,
+    "parse_rate": 1.0,
+    "confusion": {
+      "tp": 28,
+      "fp": 0,
+      "tn": 172,
+      "fn": 0
+    }
+  },
+  "comparison": {
+    "accuracy": {
+      "mimic_iv": 0.9402,
+      "synthetic": 1.0,
+      "delta": -0.0598
+    },
+    "sensitivity": {
+      "mimic_iv": 0.7,
+      "synthetic": 1.0,
+      "delta": -0.3
+    },
+    "specificity": {
+      "mimic_iv": 1.0,
+      "synthetic": 1.0,
+      "delta": 0.0
+    },
+    "precision": {
+      "mimic_iv": 1.0,
+      "synthetic": 1.0,
+      "delta": 0.0
+    },
+    "f1": {
+      "mimic_iv": 0.8235,
+      "synthetic": 1.0,
+      "delta": -0.1765
+    },
+    "parse_rate": {
+      "mimic_iv": 0.9658,
+      "synthetic": 1.0,
+      "delta": -0.0342
+    }
+  }
+}

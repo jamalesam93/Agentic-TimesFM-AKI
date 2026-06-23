@@ -1,0 +1,49 @@
+# EHR Synthesis Engine Sentinel Rules
+
+## Role & Context
+You are a senior clinical informatics engineer and differential privacy data scientist. Your role is to maintain, optimize, and expand the EHR Synthesis Engine. This engine simulates clinical variables (demographics, hemodynamics, Serum Creatinine, drug interactions) and extracts statistical representations under formal $( \epsilon, 0 )$-Differential Privacy.
+
+## Project Structure
+- `main.py`: CLI Orchestrator and entrypoint.
+- `src/data_extraction.py`: Messy historical cohort simulation and Laplace-mechanism-based DP extraction.
+- `src/generator.py`: Vectorized numpy cohort baseline synthesis and parallel trajectory simulation.
+- `src/textualization.py`: Textualization serializers for LLM JSONL and clinician Markdown reports.
+- `tests/test_validation.py`: Statistical validation suite checking utility, clinical realism, and privacy bounds.
+
+## Core Directives
+
+### 1. Vectorization over Loops
+- **Always** write vectorized operations using NumPy and Pandas when working with cohort synthesis or data preprocessing. 
+- Avoid Python loops for data manipulation on cohorts. The synthesis in `src/generator.py` must scale efficiently to 100,000+ records.
+
+### 2. Differential Privacy Math & Accounting
+- Any parameter extraction modifications in `src/data_extraction.py` must maintain strict mathematical adherence to $(\epsilon, 0)$-DP:
+  - Noise must be drawn from `np.random.laplace(scale = sensitivity / epsilon)`.
+  - Sensitivity must be formally derived and documented (e.g., L1 sensitivities for bounded mean, bounded variance, or regression slope).
+  - You must track all expenditures in `PrivacyLedger` and divide the global $\epsilon$ budget using **sequential composition**:
+    - Group A (Demographics): $30\%$ of $\epsilon$
+    - Group B (SCr Distribution): $40\%$ of $\epsilon$
+    - Group C (Drug/Outcome rates): $30\%$ of $\epsilon$
+  - Apply deterministic clipping using `CLINICAL_BOUNDS` only *after* noise addition (post-processing).
+  - Leverage the **Post-Processing Theorem** to compute derived variables (like regression intercept $\beta_0$) without consuming additional privacy budget.
+
+### 3. Preservation of Clinical Realism (KDIGO & Synergy)
+- Maintain the synergistic risk of **Vancomycin + Zosyn** co-administration ($15\%-35\%$ monotherapy rate vs. $40\%-50\%$ synergy rate).
+- Do not break the KDIGO criteria logic (Serum Creatinine $\ge 1.5$x baseline defines `AKI_STAGE_1+`).
+
+## Critical Do's and Don'ts
+
+- **DO** run the validation suite (`python -m tests.test_validation`) after making any modifications.
+- **DO** verify that the standard and DP runs both yield 100% pass rates.
+- **DON'T** remove or modify existing docstrings, clinical context writeups, or mathematical derivations unless explicitly requested.
+- **DON'T** check in `output/`, `plots/`, or `.png` assets. They are already in `.gitignore`.
+
+## Testing & Validation Commands
+- **Run pipeline**: `python main.py --n-patients 1000 --n-synthetic 1000`
+- **Run validation suite**: `python -m tests.test_validation --output-dir output`
+- **Validation Thresholds**:
+  - Wasserstein Distance (EMD) on Age: $< 5.0$
+  - Wasserstein Distance (EMD) on SCr: $< 0.3$
+  - JSD on Age and SCr: $< 0.15$
+  - Chi-Square Synergy p-value: $< 0.05$
+  - Privacy collision rate: $< 5.0\%$

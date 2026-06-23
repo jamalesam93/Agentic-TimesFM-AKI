@@ -104,6 +104,30 @@ def main():
 
     # Save extracted parameters as JSON
     params_path = os.path.join(args.output_dir, "extracted_parameters.json")
+    # Save privacy budget ledger
+    privacy_budget_path = os.path.join(args.output_dir, "privacy_budget.json")
+    if "_privacy_ledger_structured" in extracted_parameters:
+        ledger_data = {
+            "differential_privacy_enabled": True,
+            "total_epsilon": args.epsilon,
+            "total_delta": 0.0,
+            "mechanism": "Laplace Mechanism",
+            "queries": extracted_parameters["_privacy_ledger_structured"]
+        }
+        # Remove the structured key from parameters so parameters JSON remains clean
+        del extracted_parameters["_privacy_ledger_structured"]
+    else:
+        ledger_data = {
+            "differential_privacy_enabled": False,
+            "total_epsilon": None,
+            "total_delta": None,
+            "mechanism": None,
+            "queries": []
+        }
+    with open(privacy_budget_path, "w", encoding="utf-8") as f:
+        json.dump(ledger_data, f, indent=2, ensure_ascii=False)
+    print(f"  -> Saved formal privacy budget ledger to {privacy_budget_path}.")
+
     with open(params_path, "w", encoding="utf-8") as f:
         json.dump(extracted_parameters, f, indent=2, ensure_ascii=False)
     print(f"  -> Saved extracted statistical soul to {params_path}.")

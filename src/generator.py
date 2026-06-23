@@ -74,13 +74,29 @@ def synthesize_cohort(
 
     genders = rng.binomial(1, parameters['male_proportion'], n_synthetic)
 
+    # --- Vectorized comorbidity sampling (Data-driven buckets) ---
+    bucket_indices = np.clip(np.digitize(ages, [18, 35, 50, 65, 80, 96]) - 1, 0, 4)
+    p_htn = np.array(parameters['p_htn_buckets'])[bucket_indices]
+    p_dm = np.array(parameters['p_dm_buckets'])[bucket_indices]
+    
+    has_htn = rng.rand(n_synthetic) < p_htn
+    has_dm = rng.rand(n_synthetic) < p_dm
+
+    # --- Vectorized CKD sampling ---
+    ckd_prob = np.where(ages < 50, 0.10, np.where(ages < 70, 0.25, 0.40))
+    has_ckd = rng.rand(n_synthetic) < ckd_prob
+    s3_mask = has_ckd & (rng.rand(n_synthetic) < 0.4)
+    s2_mask = has_ckd & ~s3_mask
+    no_ckd_mask = ~has_ckd
+
     # --- Vectorized baseline SCr ---
-    # We predict the baseline SCr in log-space, add normally distributed residuals
-    # using the DP-protected variance (log_scr_var), and exponentiate back.
-    predicted_log_scr = (ages * parameters['age_to_scr_slope']) + parameters['age_to_scr_intercept']
-    log_variance = parameters['log_scr_var']
-    residuals = rng.normal(0, np.sqrt(log_variance), size=n_synthetic)
-    baseline_scr = np.exp(predicted_log_scr + residuals)
+    baseline_scr = np.zeros(n_synthetic)
+    baseline_scr[no_ckd_mask] = rng.uniform(0.6, 1.1, size=no_ckd_mask.sum())
+    baseline_scr[s2_mask] = rng.uniform(1.0, 1.3, size=s2_mask.sum())
+    baseline_scr[s3_mask] = rng.uniform(1.3, 2.0, size=s3_mask.sum())
+    
+    baseline_scr += (ages - 60) * 0.002
+    baseline_scr += genders * 0.1
     baseline_scr = np.maximum(0.4, baseline_scr).round(2)
 
     # --- Vectorized drug exposure assignment ---
@@ -94,26 +110,47 @@ def synthesize_cohort(
 
     # --- Vectorized synergistic AKI probability ---
     aki_prob = np.full(n_synthetic, parameters['aki_rate_baseline'])
+    zosyn_only_mask = (received_vanco == 0) & (received_zosyn == 1)
     vanco_only_mask = (received_vanco == 1) & (received_zosyn == 0)
     synergy_mask = (received_vanco == 1) & (received_zosyn == 1)
+    
+    aki_prob[zosyn_only_mask] = parameters.get('aki_rate_zosyn_only', 0.10)
     aki_prob[vanco_only_mask] = parameters['aki_rate_vanco_only']
     aki_prob[synergy_mask] = parameters['aki_rate_vanco_zosyn']
+    
+    # Adjust for renal risk (SCr > 1.0 increases risk)
+    risk_multiplier = 1.0 + np.maximum(0, baseline_scr - 1.0) * 0.8
+    aki_prob = np.clip(aki_prob * risk_multiplier, 0.0, 0.95)
+    
     developed_aki = (rng.rand(n_synthetic) < aki_prob).astype(int)
 
     # --- Assemble into list of lightweight dicts ---
     gender_labels = np.where(genders == 1, "M", "F")
-    patients = [
-        {
+    patients = []
+    for i in range(n_synthetic):
+        comorbidities = []
+        if has_htn[i]:
+            comorbidities.append("Hypertension")
+        if has_dm[i]:
+            comorbidities.append("Type 2 Diabetes Mellitus")
+            
+        b_scr = baseline_scr[i]
+        # Assign CKD stage based on sampled flags
+        if s3_mask[i]:
+            comorbidities.append("Chronic Kidney Disease Stage 3")
+        elif s2_mask[i]:
+            comorbidities.append("Chronic Kidney Disease Stage 2")
+            
+        patients.append({
             'synthetic_id': f"SYN_{i:05d}",
             'age': int(ages[i]),
             'gender': str(gender_labels[i]),
-            'baseline_scr': float(baseline_scr[i]),
+            'baseline_scr': float(b_scr),
+            'comorbidities': comorbidities,
             'received_vanco': bool(received_vanco[i]),
             'received_zosyn': bool(received_zosyn[i]),
             'developed_aki': bool(developed_aki[i]),
-        }
-        for i in range(n_synthetic)
-    ]
+        })
     return patients
 
 
@@ -146,6 +183,14 @@ def generate_temporal_record(
     Uses a local RandomState instance (not the global numpy seed) so that
     each worker process produces deterministic, non-colliding sequences.
 
+    This version introduces:
+      1. Clinical Feedback Loop: Clinicians may discontinue antibiotics on Day 4/5 
+         due to rising Serum Creatinine, causing SCr to enter a recovery trend.
+      2. Flowsheet Charting Errors: A 5% probability that active drug administration 
+         is not charted (flagged False in flowsheet) despite patient exposure.
+      3. KDIGO Criteria consistency: Once a patient develops AKI, they remain 
+         flagged as AKI_STAGE_1+ even if SCr begins to drop (recovery).
+
     Args:
         patient: A single patient's baseline record (plain dict).
         days: Number of ICU days to simulate.
@@ -159,6 +204,17 @@ def generate_temporal_record(
     trajectory = []
     current_scr = patient['baseline_scr']
     vanco_trough = 0.0
+    
+    # Clinical feedback loop: decision to discontinue drugs due to rising creatinine
+    discontinued = False
+    
+    # Charting noise: does the flowsheet fail to record the active prescription?
+    charting_error_vanco = rng.rand() < 0.05
+    charting_error_zosyn = rng.rand() < 0.05
+    
+    # Track if KDIGO AKI criteria was ever met during the trajectory
+    had_aki = False
+    scr_history = [patient['baseline_scr']]
 
     for day in range(1, days + 1):
         # Base hemodynamics
@@ -167,36 +223,84 @@ def generate_temporal_record(
         if patient['developed_aki'] and day >= 3:
             map_val = int(rng.normal(63, 4))
 
-        # Cumulative toxic exposure calculation
-        vanco_active = patient['received_vanco'] and day >= 2
-        zosyn_active = patient['received_zosyn'] and day >= 2
+        # Check if clinicians discontinue therapy due to AKI on Day 4 or 5
+        if patient['developed_aki'] and day >= 4 and not discontinued:
+            # 30% chance to discontinue antibiotics to prevent further damage
+            if rng.rand() < 0.30:
+                discontinued = True
 
-        if vanco_active:
+        # Actual drug administration
+        actual_vanco = patient['received_vanco'] and day >= 2 and not discontinued
+        actual_zosyn = patient['received_zosyn'] and day >= 2 and not discontinued
+
+        # Simulated measurements (always reflect actual administration)
+        if actual_vanco:
             vanco_trough += rng.uniform(3.0, 5.0)
-            if patient['received_zosyn']:
+            if actual_zosyn:
                 # Synergy accelerates and exacerbates the structural damage
                 vanco_trough += rng.uniform(1.5, 3.0)
+        elif vanco_trough > 0:
+            # Pharmacokinetic clearance when drug is stopped
+            vanco_trough = max(0.0, vanco_trough - rng.uniform(4.0, 8.0))
 
-        # Simulate temporal rise of SCr if patient develops AKI
+        # Flowsheet flags (may contain charting errors)
+        flowsheet_vanco = actual_vanco and not charting_error_vanco
+        flowsheet_zosyn = actual_zosyn and not charting_error_zosyn
+
+        # Simulate temporal rise/fall of SCr if patient develops AKI
         if patient['developed_aki'] and day >= 3:
-            decay_rate = rng.uniform(0.3, 0.8)
-            current_scr += round(decay_rate, 2)
+            if discontinued and day == 5:
+                # Renal recovery phase
+                recovery_rate = rng.uniform(0.1, 0.4)
+                current_scr -= round(recovery_rate, 2)
+            else:
+                # Active injury phase
+                decay_rate = rng.uniform(0.3, 0.8)
+                current_scr += round(decay_rate, 2)
         else:
+            # Normal physiological drift
             current_scr += round(rng.normal(0.0, 0.03), 2)
 
-        # KDIGO criteria: AKI Stage 1 is defined as SCr >= 1.5x baseline
+        # Calculate KDIGO Stage and rolling baseline minimums
+        past_48h = scr_history[-2:] if len(scr_history) >= 2 else []
+        creat_low_past_48hr = min(past_48h) if past_48h else current_scr
+        creat_low_past_7day = min(scr_history)
+
+        stage = 0
+        stage1_cond1 = current_scr >= creat_low_past_7day * 1.5
+        stage1_cond2 = (len(past_48h) > 0 and current_scr >= creat_low_past_48hr + 0.3)
+        stage2_cond = current_scr >= creat_low_past_7day * 2.0
+        stage3_cond1 = current_scr >= creat_low_past_7day * 3.0
+        stage3_cond2 = (current_scr >= 4.0 and (current_scr >= creat_low_past_7day * 1.5 or current_scr >= creat_low_past_48hr + 0.3))
+
+        if stage1_cond1 or stage1_cond2:
+            stage = 1
+        if stage2_cond:
+            stage = 2
+        if stage3_cond1 or stage3_cond2:
+            stage = 3
+
+        scr_history.append(current_scr)
+
+        # KDIGO criteria: AKI Stage 1+ is defined as SCr >= 1.5x baseline or any stage >= 1
+        if stage >= 1:
+            had_aki = True
+
         risk_label = "NORMAL"
-        if current_scr >= patient['baseline_scr'] * 1.5:
+        if had_aki:
             risk_label = "AKI_STAGE_1+"
 
         trajectory.append({
             'day': day,
             'map': map_val,
-            'vanco_active': vanco_active,
-            'zosyn_active': zosyn_active,
-            'vanco_trough': round(vanco_trough, 1) if vanco_active else 0.0,
+            'vanco_active': bool(flowsheet_vanco),
+            'zosyn_active': bool(flowsheet_zosyn),
+            'vanco_trough': round(vanco_trough, 1) if vanco_trough > 0.0 else 0.0,
             'scr': round(current_scr, 2),
             'risk_state': risk_label,
+            'kdigo_stage': stage,
+            'creat_low_past_48hr': round(creat_low_past_48hr, 2),
+            'creat_low_past_7day': round(creat_low_past_7day, 2),
         })
 
     return trajectory

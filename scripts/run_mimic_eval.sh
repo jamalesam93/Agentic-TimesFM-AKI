@@ -57,9 +57,8 @@ echo "============================================================"
 if [ "${SKIP_DOWNLOAD:-0}" -ne 1 ]; then
     echo -e "\n[Stage 1] Downloading GGUF from Hugging Face..."
     mkdir -p "$(dirname "$GGUF_LOCAL")"
-    huggingface-cli download "$HF_REPO" "$GGUF_FILENAME" \
-        --local-dir "$(dirname "$GGUF_LOCAL")" \
-        --local-dir-use-symlinks False
+    hf download "$HF_REPO" "$GGUF_FILENAME" \
+        --local-dir "$(dirname "$GGUF_LOCAL")"
     echo "  ✓ Downloaded to $GGUF_LOCAL"
 else
     echo -e "\n[Stage 1] SKIPPED download (SKIP_DOWNLOAD=1)"

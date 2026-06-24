@@ -29,11 +29,18 @@ METRICS_FILE="$PROJECT_DIR/reports/phd_eval_predictions.metrics.json"
 
 LLAMA_CPP_DIR="${LLAMA_CPP_PATH:-$HOME/llama.cpp}"
 
+# Determine python command (Vast.ai/Ubuntu uses python3, Windows/Git Bash often uses python)
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+    PYTHON_BIN="python"
+fi
+
 echo "=========================================================="
 echo "      PHD PROPOSAL PHASE 2 - LLM PIPELINE"
 echo "=========================================================="
 echo "Project Directory: $PROJECT_DIR"
 echo "Llama.cpp Path   : $LLAMA_CPP_DIR"
+echo "Python Executable: $PYTHON_BIN"
 echo "=========================================================="
 
 # -------------------------------------------------------------------------
@@ -41,7 +48,7 @@ echo "=========================================================="
 # -------------------------------------------------------------------------
 if [ ! -f "$TRAIN_FILE" ]; then
     echo -e "\n[Stage 1] Training dataset missing. Generating..."
-    python "$SCRIPT_DIR/generate_llm_dataset.py"
+    "$PYTHON_BIN" "$SCRIPT_DIR/generate_llm_dataset.py"
 else
     echo -e "\n[Stage 1] Training dataset already exists: $TRAIN_FILE"
 fi
@@ -50,7 +57,7 @@ fi
 if [ ! -f "$EVAL_FILE" ]; then
     echo -e "\n[Stage 1b] Holdout dataset missing. Generating..."
     # Reuse the build_holdout script but output to the PhD eval file
-    python "$SCRIPT_DIR/build_holdout.py" --n 200 --seed 9999 --out "$EVAL_FILE"
+    "$PYTHON_BIN" "$SCRIPT_DIR/build_holdout.py" --n 200 --seed 9999 --out "$EVAL_FILE"
 else
     echo -e "\n[Stage 1b] Holdout dataset already exists: $EVAL_FILE"
 fi
@@ -59,26 +66,26 @@ fi
 # Stage 2: Contamination Gate
 # -------------------------------------------------------------------------
 echo -e "\n[Stage 2] Running Contamination Check..."
-python "$SCRIPT_DIR/check_contamination.py" "$TRAIN_FILE" "$EVAL_FILE"
+"$PYTHON_BIN" "$SCRIPT_DIR/check_contamination.py" "$TRAIN_FILE" "$EVAL_FILE"
 
 # -------------------------------------------------------------------------
 # Stage 3: Dataset Schema Validation
 # -------------------------------------------------------------------------
 echo -e "\n[Stage 3] Validating Dataset Schema..."
-python "$SCRIPT_DIR/validate_dikd_dataset.py" "$TRAIN_FILE"
+"$PYTHON_BIN" "$SCRIPT_DIR/validate_dikd_dataset.py" "$TRAIN_FILE"
 
 # -------------------------------------------------------------------------
 # Stage 4: Structural Audit
 # -------------------------------------------------------------------------
 echo -e "\n[Stage 4] Auditing Label Balance..."
-python "$SCRIPT_DIR/audit_labels.py" "$TRAIN_FILE" --json "$PROJECT_DIR/reports/phd_audit_summary.json"
+"$PYTHON_BIN" "$SCRIPT_DIR/audit_labels.py" "$TRAIN_FILE" --json "$PROJECT_DIR/reports/phd_audit_summary.json"
 
 # -------------------------------------------------------------------------
 # Stage 5: Train QLoRA
 # -------------------------------------------------------------------------
 if [ "${SKIP_TRAINING:-0}" -ne 1 ]; then
     echo -e "\n[Stage 5] Starting QLoRA Fine-Tuning..."
-    python "$SCRIPT_DIR/train_qlora_gemma4_12b.py" \
+    "$PYTHON_BIN" "$SCRIPT_DIR/train_qlora_gemma4_12b.py" \
         --train-file "$TRAIN_FILE" \
         --output-dir "$OUTPUT_DIR" \
         --backend unsloth
@@ -91,7 +98,7 @@ fi
 # -------------------------------------------------------------------------
 if [ "${SKIP_TRAINING:-0}" -ne 1 ]; then
     echo -e "\n[Stage 6] Merging Adapter into Base Model..."
-    python "$SCRIPT_DIR/merge_adapter.py" \
+    "$PYTHON_BIN" "$SCRIPT_DIR/merge_adapter.py" \
         --adapter-dir "$OUTPUT_DIR/lora_adapter" \
         --out-dir "$MERGED_DIR"
 else
@@ -122,7 +129,7 @@ if [ "${SKIP_GGUF:-0}" -ne 1 ]; then
     mkdir -p "$(dirname "$GGUF_F16")"
     
     echo "  -> Converting HF weights to f16 GGUF..."
-    python "$CONVERT_SCRIPT" "$MERGED_DIR" --outfile "$GGUF_F16" --outtype f16
+    "$PYTHON_BIN" "$CONVERT_SCRIPT" "$MERGED_DIR" --outfile "$GGUF_F16" --outtype f16
 
     QUANTIZE_BIN=""
     for bin_path in "$LLAMA_CPP_DIR/llama-quantize" "$LLAMA_CPP_DIR/build/bin/llama-quantize" "$LLAMA_CPP_DIR/build/bin/quantize"; do
@@ -191,14 +198,14 @@ if [ "${SKIP_GGUF:-0}" -ne 1 ]; then
     done
 
     echo "  -> Running batch evaluator against llama-server..."
-    python "$SCRIPT_DIR/eval_dikd_batch.py" \
+    "$PYTHON_BIN" "$SCRIPT_DIR/eval_dikd_batch.py" \
         --base-url "http://127.0.0.1:$PORT" \
         --model "phd-gemma-12b" \
         --data "$EVAL_FILE" \
         --out "$EVAL_OUT"
 
     echo "  -> Running clinical quality tier gates..."
-    python "$SCRIPT_DIR/tier_gates.py" "$METRICS_FILE" --json "$PROJECT_DIR/reports/phd_gate_results.json"
+    "$PYTHON_BIN" "$SCRIPT_DIR/tier_gates.py" "$METRICS_FILE" --json "$PROJECT_DIR/reports/phd_gate_results.json"
 
     echo -e "\n[SUCCESS] Pipeline successfully completed!"
 else

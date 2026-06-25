@@ -21,7 +21,7 @@ LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL)\]")
 
 # Acceptable class balance range (AKI proportion)
 MIN_AKI_RATIO = 0.10  # At least 10% AKI cases
-MAX_AKI_RATIO = 0.35  # At most 35% AKI cases
+MAX_AKI_RATIO = 0.55  # At most 55% AKI cases (allows balanced SFT datasets)
 
 
 def load_jsonl(path: Path) -> list[dict]:

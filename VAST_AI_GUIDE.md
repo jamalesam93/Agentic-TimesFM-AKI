@@ -104,9 +104,9 @@ cd ~
 git clone --recursive https://github.com/ggerganov/llama.cpp.git
 cd llama.cpp
 
-# Compile using CMake with CUDA enabled
+# Compile using CMake targeting only llama-server and llama-quantize with CUDA enabled
 cmake -B build -DGGML_CUDA=ON
-cmake --build build --config Release -j$(nproc)
+cmake --build build --target llama-server --target llama-quantize --config Release -j$(nproc)
 ```
 
 Verify that the binaries `llama-quantize` and `llama-server` exist in `~/llama.cpp/build/bin/`.

@@ -1,26 +1,26 @@
-# Vast.ai Deployment & Execution Guide: Phase 2 LLM Pipeline
+# Vast.ai Deployment & Execution Guide: Real-World Grounded Phase 2 LLM Pipeline
 
-This guide outlines the step-by-step procedure for deploying, configuring, and executing the Phase 2 LLM Fine-Tuning and Evaluation Pipeline (`scripts/run_phd_phase2_pipeline.sh`) on a **Vast.ai** GPU instance. 
+This guide outlines the exact, step-by-step procedure for deploying, configuring, and executing the **Real-World Grounded Phase 2 LLM Fine-Tuning and Evaluation Pipeline** (`scripts/real_world/run_phd_phase2_pipeline_real.sh`) on a **Vast.ai** GPU instance.
 
 ---
 
 ## 🖥️ GPU Sizing & Instance Requirements
 
-Fine-tuning and merging a **12B parameter model** (like `google/gemma-4-12b-it`) has specific hardware requirements:
+Fine-tuning and merging a **12B parameter model** (like `google/gemma-4-12b-it` or similar) requires specific hardware thresholds:
 
 *   **Training (4-bit QLoRA)**: Requires **~12 GB to 16 GB** VRAM.
-*   **Merging (Full bf16 precision)**: Requires loading the base model and the adapter in 16-bit precision. This takes **~24 GB to 28 GB** VRAM.
-*   **Recommended GPUs**:
-    *   **RTX A6000 / RTX 6000 Ada (48 GB VRAM)**: *(Highly Recommended)* Offers the best balance of price and memory, preventing Out-Of-Memory (OOM) errors during the model merge phase.
+*   **Merging (Full bf16 precision)**: Requires loading the base model and the adapter simultaneously. This takes **~24 GB to 28 GB** VRAM.
+*   **Recommended GPU Hardware**:
+    *   **RTX A6000 / RTX 6000 Ada (48 GB VRAM)**: *(Highly Recommended)* Best price-to-memory ratio, completely prevents Out-Of-Memory (OOM) errors during the model merge stage.
     *   **A100 (40 GB or 80 GB VRAM) / H100 (80 GB VRAM)**: Overkill for training, but extremely fast.
-    *   **RTX 3090 / 4090 (24 GB VRAM)**: Can be used for training, but the merging stage (`merge_adapter.py`) might crash due to OOM unless CPU offloading is configured.
-*   **Disk Space**: Allocate at least **80 GB to 100 GB** of storage. The Gemma-4-12B weights are ~24 GB, the merged model is ~24 GB, and the GGUF outputs/dependencies will take another 20-30 GB.
+    *   **RTX 3090 / 4090 (24 GB VRAM)**: Good for training, but the merging stage (`merge_adapter.py`) might crash due to RAM/VRAM exhaustion unless CPU offloading is configured.
+*   **Disk Space**: Allocate at least **90 GB to 100 GB** of storage. The base model weights, intermediate checkpoints, merged model, and GGUF outputs will consume significant disk space.
 
 ---
 
 ## 🛠️ Step 1: Vast.ai Instance Configuration
 
-1.  **Fund your Account**: Go to [Vast.ai](https://vast.ai/) and deposit funds (Credit Card or Cryptocurrencies).
+1.  **Fund your Account**: Go to [Vast.ai](https://vast.ai/) and deposit funds (Credit Card or Crypto).
 2.  **Add SSH Key**:
     *   Generate an SSH key pair on your local machine if you don't have one:
         ```bash
@@ -33,8 +33,8 @@ Fine-tuning and merging a **12B parameter model** (like `google/gemma-4-12b-it`)
         *   `pytorch/pytorch:2.2.0-cuda12.1-cudnn8-devel` OR `pytorch/pytorch:latest`
     *   *Note: Ensure the tag contains `-devel` so that CUDA compilers (`nvcc`) are present. This is required for compiling llama.cpp and compiling custom PyTorch/Unsloth kernels.*
 4.  **Launch the Instance**:
-    *   Filter by GPU (e.g., search for `A6000` or `RTX 4090`).
-    *   Adjust the slider for **Disk Size** to **90 GB**.
+    *   Filter by GPU (e.g., search for `A6000`).
+    *   Adjust the slider for **Disk Size** to **100 GB**.
     *   Click **Rent** on a high-reliability instance.
 
 ---
@@ -50,9 +50,9 @@ ssh -p <PORT> root@<IP_ADDRESS>
 
 ---
 
-## 📦 Step 3: Initialize the Environment
+## 📦 Step 3: Initialize the Environment & Dependencies
 
-Run the following commands on the remote instance to clone the repository and configure dependencies:
+Run these commands inside your remote Vast.ai terminal to clone the repository and configure dependencies:
 
 ### 1. System Updates & Prerequisites
 ```bash
@@ -60,14 +60,14 @@ apt-get update && apt-get install -y git build-essential cmake curl rsync wget
 ```
 
 ### 2. Clone the Repository
-Clone the PhD proposal repository:
+Clone the repository containing the real-world dataset and the new pipeline configuration:
 ```bash
 git clone https://github.com/jamalesam93/AKI-training.git
 cd AKI-training
 ```
 
 ### 3. Install Python Dependencies
-Unsloth is highly optimized for fast SFT and lower memory usage. We recommend setting up the dependencies as follows:
+Unsloth is highly optimized for fast SFT and lower memory usage. Set up the dependencies as follows:
 ```bash
 # Update pip
 pip install --upgrade pip
@@ -81,7 +81,7 @@ pip install --no-cache-dir trl peft transformers datasets bitsandbytes accelerat
 ```
 
 ### 4. Authenticate with Hugging Face
-Gemma 4 12B IT is a gated model. You must authorize your Hugging Face account to access it:
+Gemma-4-12B is a gated model. You must authorize your Hugging Face account to access it:
 1. Generate a User Access Token (Read) at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens).
 2. Authenticate the CLI on your Vast instance:
    ```bash
@@ -113,30 +113,30 @@ Verify that the binaries `llama-quantize` and `llama-server` exist in `~/llama.c
 
 ---
 
-## 🏃 Step 5: Run the End-to-End Pipeline
+## 🏃 Step 5: Run the End-to-End Real-World Pipeline
 
 Return to the repository directory and run the orchestrator script:
 ```bash
 cd ~/AKI-training
 
 # Make the pipeline executable
-chmod +x scripts/run_phd_phase2_pipeline.sh
+chmod +x scripts/real_world/run_phd_phase2_pipeline_real.sh
 
-# Run the complete pipeline (Stage 1 to Stage 8)
-LLAMA_CPP_PATH=~/llama.cpp bash scripts/run_phd_phase2_pipeline.sh
+# Run the complete real-world pipeline (Stage 1 to Stage 8)
+LLAMA_CPP_PATH=~/llama.cpp bash scripts/real_world/run_phd_phase2_pipeline_real.sh
 ```
 
 ### What happens when you run this script?
-1. **Stage 1**: Automatically builds training data (`data/phd_proposal_sft_dataset.jsonl`) and holdout validation data (`data/phd_proposal_eval_holdout.jsonl`).
+1. **Stage 1**: Generates real-world grounded training data (`data/real_world/phd_proposal_sft_dataset.jsonl`) and holdout validation data (`data/real_world/phd_proposal_eval_holdout.jsonl`) based on the HDHI & CKD datasets.
 2. **Stage 2-4**: Performs data quality validation, checks for target leakage/contamination, and summarizes label distribution.
-3. **Stage 5**: Initiates QLoRA fine-tuning using Unsloth. It trains for 2 epochs, saving the final adapter to `outputs/phd-gemma-12b/lora_adapter`.
-4. **Stage 6**: Loads the base Gemma 12B model in full bf16 precision, merges the adapter, and saves the standalone merged model to `exports/phd-gemma-12b-merged-bf16`.
-5. **Stage 7**: Converts the merged weights to GGUF format (`exports/phd-gemma-12b-f16.gguf`) and quantizes them to Q6_K layout (`exports/phd-gemma-12b-q6_k.gguf`).
-6. **Stage 8**: Spins up the `llama-server` in the background on port `1235`, runs `scripts/eval_dikd_batch.py` to evaluate the validation set, and prints the clinical tier gates output.
+3. **Stage 5**: Initiates QLoRA fine-tuning using Unsloth. It trains for 2 epochs, saving the final adapter to `outputs/real_world/phd-gemma-12b/lora_adapter`.
+4. **Stage 6**: Loads the base Gemma 12B model in full bf16 precision, merges the adapter, and saves the standalone merged model to `exports/real_world/phd-gemma-12b-merged-bf16`.
+5. **Stage 7**: Converts the merged weights to GGUF format (`exports/real_world/phd-gemma-12b-f16.gguf`) and quantizes them to Q6_K layout (`exports/real_world/phd-gemma-12b-q6_k.gguf`).
+6. **Stage 8**: Spins up the `llama-server` in the background on port `1235`, runs `eval_dikd_batch.py` to evaluate the validation set, and prints the clinical tier gates output.
 
 ---
 
-## 📂 Step 6: Downloading the Quantized Model & Reports
+## 📂 Step 6: Download the Quantized Model & Reports
 
 After the pipeline successfully completes, you will want to pull the quantized GGUF model and evaluation metrics back to your local machine.
 
@@ -144,12 +144,12 @@ Open a **new terminal window on your local machine** and run:
 
 ### 1. Download the Quantized Model (`.gguf`)
 ```bash
-scp -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/exports/phd-gemma-12b-q6_k.gguf ./
+scp -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/exports/real_world/phd-gemma-12b-q6_k.gguf ./
 ```
 
 ### 2. Download the Reports and Metrics
 ```bash
-scp -r -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/reports/ ./
+scp -r -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/reports/real_world/ ./
 ```
 
 ---
@@ -158,15 +158,15 @@ scp -r -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/reports/ ./
 
 ### 1. Out of Memory (OOM) during Training (Stage 5)
 If you run out of GPU memory during the fine-tuning stage:
-*   Open `scripts/train_qlora_gemma4_12b.py`.
-*   Reduce `BATCH_SIZE` (line 48) to `1`.
-*   Increase `GRAD_ACCUM` (line 49) to `16` to maintain an effective batch size of 16.
+*   Open `train_qlora_gemma4_12b.py`.
+*   Reduce `BATCH_SIZE` to `1`.
+*   Increase `GRAD_ACCUM` to `16` to maintain an effective batch size of 16.
 
 ### 2. Out of Memory (OOM) during Merging (Stage 6)
 If the Python process crashes during `merge_adapter.py`:
-*   Make sure you are not sharing the GPU with other processes. Check memory using `nvidia-smi`.
+*   Make sure you are not sharing the GPU with other processes (`nvidia-smi`).
 *   If you are on a 24 GB GPU, you must rent a larger GPU (e.g., RTX A6000 48GB) or implement CPU-based loading:
-    *   Modify `scripts/merge_adapter.py` to load the base model using low-cpu-mem-usage options:
+    *   Modify `merge_adapter.py` to load the base model using low-cpu-mem-usage options:
         ```python
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=args.base_model,

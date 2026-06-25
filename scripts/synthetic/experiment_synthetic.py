@@ -7,12 +7,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_curve, auc, roc_auc_score
 
-# Add parent directory to path so we can import ehr_synthesis_engine
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import ehr_synthesis_engine as ehr
+# Add parent directory to path so we can import src
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from src import data_extraction as ehr
+from src import generator
 
 def main():
-    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    data_dir = os.path.join(root_dir, "data", "synthetic")
     csv_clean_path = os.path.join(data_dir, "phd_proposal_synthetic_cohort.csv")
     csv_messy_path = os.path.join(data_dir, "phd_proposal_synthetic_cohort_messy.csv")
     
@@ -80,7 +82,7 @@ def main():
         stats = ehr.extract_statistical_parameters(raw_df)
         
         print("2. Synthesizing 5,000 privacy-preserving patients...")
-        synthetic_patients = ehr.synthesize_cohort(stats, n_synthetic=5000, seed=123)
+        synthetic_patients = generator.synthesize_cohort(stats, n_synthetic=5000, seed=123)
         
         # Convert list of dicts to DataFrame
         df = pd.DataFrame(synthetic_patients)
@@ -172,7 +174,7 @@ def main():
     print(f"-> Robustness Delta AUC: {auc_m - auc_c:+.3f}")
     
     # Plotting
-    plots_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "plots")
+    plots_dir = os.path.join(root_dir, "plots", "synthetic")
     os.makedirs(plots_dir, exist_ok=True)
     
     # 4a. ROC Curve (Comparing Clean vs Imputed)

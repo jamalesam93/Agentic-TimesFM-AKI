@@ -1,0 +1,11 @@
+synthetic_id,age,gender,baseline_scr,comorbidities,received_vanco,received_zosyn,developed_aki
+SYN_00000,67,M,0.85,['Hypertension'],False,True,False
+SYN_00001,59,M,0.97,[],False,True,False
+SYN_00002,69,M,0.79,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,False
+SYN_00003,81,M,1.14,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,True
+SYN_00004,58,M,0.73,[],True,False,True
+SYN_00005,58,M,1.97,"['Hypertension', 'Chronic Kidney Disease Stage 3']",True,False,True
+SYN_00006,81,M,1.24,['Type 2 Diabetes Mellitus'],False,True,True
+SYN_00007,71,M,1.11,['Hypertension'],False,False,False
+SYN_00008,54,M,0.79,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,True
+SYN_00009,68,M,0.72,[],True,False,True

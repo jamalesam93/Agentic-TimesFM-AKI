@@ -13,7 +13,7 @@ set -euo pipefail
 
 # Path configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Input datasets
 TRAIN_FILE="$PROJECT_DIR/data/real_world/phd_proposal_sft_dataset.jsonl"

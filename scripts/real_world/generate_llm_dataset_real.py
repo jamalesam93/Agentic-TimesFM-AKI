@@ -7,6 +7,7 @@ import random
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from src import data_extraction_real as ehr
 from src import generator
+from src.textualization import format_to_llm_jsonl
 
 def generate_dataset(n_patients=2000, seed=42):
     random.seed(seed)
@@ -27,7 +28,7 @@ def generate_dataset(n_patients=2000, seed=42):
     with open(jsonl_path, "w", encoding="utf-8") as f:
         for i, patient in enumerate(synthetic_base):
             trajectory = generator.generate_temporal_record(patient, seed=seed + i)
-            llm_sample = generator.format_to_llm_jsonl(patient, trajectory)
+            llm_sample = format_to_llm_jsonl(patient, trajectory)
             f.write(json.dumps(llm_sample) + "\n")
             
             if (i + 1) % 500 == 0:

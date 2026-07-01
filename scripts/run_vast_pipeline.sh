@@ -74,7 +74,7 @@ if [ "${SKIP_TRAINING:-0}" -ne 1 ]; then
     python "$SCRIPT_DIR/train_qlora_gemma4_12b.py" \
         --train-file "$TRAIN_FILE" \
         --output-dir "$OUTPUT_DIR" \
-        --backend unsloth
+        --backend peft
 else
     echo -e "\n[Stage 5] SKIPPED: Fine-tuning training (SKIP_TRAINING=1)"
 fi

@@ -4,6 +4,6 @@ scipy>=1.7.0
 diffprivlib>=0.5.0
 tqdm>=4.60.0
 matplotlib>=3.5.0
-timesfm>=2.0.0
+timesfm[xreg]>=2.0.0
 huggingface_hub
 peft

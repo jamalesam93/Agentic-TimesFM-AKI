@@ -82,6 +82,11 @@ def train_with_unsloth(
         load_in_4bit=True,
     )
 
+    # Ensure padding is configured for variable-length batching
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
+
     print("[2/4] Configuring LoRA adapters (7 target modules)...")
     model = FastLanguageModel.get_peft_model(
         model,
@@ -135,6 +140,7 @@ def train_with_unsloth(
         train_dataset=dataset,
         dataset_text_field="text",
         max_seq_length=MAX_SEQ_LENGTH,
+        packing=False,
         args=training_args,
     )
 

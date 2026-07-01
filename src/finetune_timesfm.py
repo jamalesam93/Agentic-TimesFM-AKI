@@ -61,8 +61,9 @@ def compute_timesfm_patch_loss(peft_model, context, target, covs=None):
         padded_input[6:9] = covs[:3, 1]
         padded_input[9:12] = covs[:3, 2]
         
-    inputs = torch.tensor(padded_input).unsqueeze(0).unsqueeze(0) # Shape: [1, 1, 63]
-    masks = torch.ones(1, 1, 1, dtype=torch.float32)
+    device = next(peft_model.parameters()).device
+    inputs = torch.tensor(padded_input, device=device).unsqueeze(0).unsqueeze(0) # Shape: [1, 1, 63]
+    masks = torch.ones(1, 1, 1, dtype=torch.float32, device=device)
     
     # 1. Forward Pass (Tracks gradients through LoRA adapters)
     # The peft_model wraps TimesFM's internal nn.Module
@@ -75,7 +76,7 @@ def compute_timesfm_patch_loss(peft_model, context, target, covs=None):
     # 3. Map to Target Horizon (2 days)
     # We map the latent output projection back to our 2-day ground truth horizon
     preds_mapped = preds[:2]
-    true_target = torch.tensor(target, dtype=torch.float32)
+    true_target = torch.tensor(target, dtype=torch.float32, device=device)
     
     # 4. Compute True Mathematical Loss (MSE)
     loss = F.mse_loss(preds_mapped, true_target)

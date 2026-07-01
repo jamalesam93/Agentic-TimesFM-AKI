@@ -55,7 +55,7 @@ find_binary() {
 # ── Pre-flight: master file must exist ──────────────────────────
 if [ ! -f "$MASTER_FILE" ]; then
     echo "Error: Master dataset not found: $MASTER_FILE"
-    echo "Run 'python main.py' first to generate the synthetic training data."
+    echo "Run 'python3 main.py' first to generate the synthetic training data."
     exit 1
 fi
 
@@ -96,23 +96,23 @@ print(f'  Total: {len(lines)} | Train: {split} | Eval: {len(lines) - split}')
 echo -e "\n[Stage 2/7] Validating dataset schemas..."
 
 echo "  -> Validating train split..."
-python "$SCRIPT_DIR/validate_dikd_dataset.py" "$TRAIN_FILE"
+python3 "$SCRIPT_DIR/validate_dikd_dataset.py" "$TRAIN_FILE"
 
 echo "  -> Validating eval split..."
-python "$SCRIPT_DIR/validate_dikd_dataset.py" "$EVAL_FILE"
+python3 "$SCRIPT_DIR/validate_dikd_dataset.py" "$EVAL_FILE"
 
 # -------------------------------------------------------------------------
 # Stage 3: Label Audit
 # -------------------------------------------------------------------------
 echo -e "\n[Stage 3/7] Auditing label balance..."
-python "$SCRIPT_DIR/audit_labels.py" "$TRAIN_FILE" --json "$PROJECT_DIR/reports/audit_summary.json"
+python3 "$SCRIPT_DIR/audit_labels.py" "$TRAIN_FILE" --json "$PROJECT_DIR/reports/audit_summary.json"
 
 # -------------------------------------------------------------------------
 # Stage 4: QLoRA Fine-Tuning
 # -------------------------------------------------------------------------
 if [ "${SKIP_TRAIN:-0}" -ne 1 ]; then
     echo -e "\n[Stage 4/7] Starting QLoRA fine-tuning..."
-    python "$SCRIPT_DIR/train_qlora_gemma4_12b.py" \
+    python3 "$SCRIPT_DIR/train_qlora_gemma4_12b.py" \
         --train-file "$TRAIN_FILE" \
         --output-dir "$OUTPUT_DIR" \
         --backend unsloth
@@ -132,7 +132,7 @@ if [ "${SKIP_MERGE:-0}" -ne 1 ]; then
     fi
 
     echo -e "\n[Stage 5/7] Merging adapter into base model..."
-    python "$SCRIPT_DIR/merge_adapter.py" \
+    python3 "$SCRIPT_DIR/merge_adapter.py" \
         --adapter-dir "$ADAPTER_DIR" \
         --out-dir "$MERGED_DIR"
 else
@@ -166,7 +166,7 @@ if [ "${SKIP_GGUF:-0}" -ne 1 ]; then
     mkdir -p "$(dirname "$GGUF_F16")"
 
     echo "  -> Converting HF weights to f16 GGUF..."
-    python "$CONVERT_SCRIPT" "$MERGED_DIR" --outfile "$GGUF_F16" --outtype f16
+    python3 "$CONVERT_SCRIPT" "$MERGED_DIR" --outfile "$GGUF_F16" --outtype f16
 
     # Find quantize binary
     QUANTIZE_BIN=$(find_binary "llama-quantize" \
@@ -237,14 +237,14 @@ if [ "${SKIP_EVAL:-0}" -ne 1 ]; then
     done
 
     echo "  -> Running batch evaluator..."
-    python "$SCRIPT_DIR/eval_dikd_batch.py" \
+    python3 "$SCRIPT_DIR/eval_dikd_batch.py" \
         --base-url "http://127.0.0.1:$PORT" \
         --model "dikd-gemma4-12b" \
         --data "$EVAL_FILE" \
         --out "$EVAL_OUT"
 
     echo "  -> Running clinical quality tier gates..."
-    python "$SCRIPT_DIR/tier_gates.py" "$METRICS_FILE" --json "$PROJECT_DIR/reports/gate_results.json"
+    python3 "$SCRIPT_DIR/tier_gates.py" "$METRICS_FILE" --json "$PROJECT_DIR/reports/gate_results.json"
 
     echo -e "\n[SUCCESS] Evaluation complete. Check reports/gate_results.json"
 else

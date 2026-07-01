@@ -35,25 +35,31 @@ def run_agentic_pipeline(model_id="gemma4_unified", lora_weights_path="outputs/d
         """
         print("\n[Tool Call] The LLM is querying TimesFM for a 48-hour SCr forecast...")
         
-        # Prepare inputs format expected by TimesFM
-        context_scr = np.array(patient_data['scr'][:3], dtype=np.float32)
+        # Prepare inputs exactly as the LoRA adapters were trained!
+        context = np.array(patient_data['scr'][:3], dtype=np.float32)
+        covs = np.zeros((3, 3), dtype=np.float32)
+        covs[:, 0] = patient_data['map'][:3]
+        covs[:, 1] = patient_data['vanco_trough'][:3]
+        covs[:, 2] = [1.0 if x else 0.0 for x in patient_data['zosyn_active'][:3]]
         
-        map_cov = np.array(patient_data['map'][:5], dtype=np.float32)
-        vanco_cov = np.array(patient_data['vanco_trough'][:5], dtype=np.float32)
-        zosyn_cov = np.array([1.0 if x else 0.0 for x in patient_data['zosyn_active'][:5]], dtype=np.float32)
+        padded_input = np.zeros(63, dtype=np.float32)
+        padded_input[:len(context)] = context
+        padded_input[3:6] = covs[:, 0]
+        padded_input[6:9] = covs[:, 1]
+        padded_input[9:12] = covs[:, 2]
         
-        point_forecast, _ = timesfm_model.forecast_with_covariates(
-            inputs=[context_scr],
-            dynamic_numerical_covariates={
-                "map": [map_cov],
-                "vanco_trough": [vanco_cov],
-                "zosyn_active": [zosyn_cov]
-            }
-        )
+        # Access the raw PyTorch module with LoRA attached
+        pytorch_module = getattr(timesfm_model, 'model', timesfm_model)
+        device = next(pytorch_module.parameters()).device
         
-        # Get the day 4 and day 5 predictions
-        day_4_pred = point_forecast[0][0]
-        day_5_pred = point_forecast[0][1]
+        inputs = torch.tensor(padded_input, device=device).unsqueeze(0).unsqueeze(0)
+        masks = torch.ones(1, 1, 1, dtype=torch.float32, device=device)
+        
+        # Manual Forward Pass
+        out = pytorch_module(inputs, masks)
+        preds = out[0][2].squeeze().flatten()
+        day_4_pred = preds[0].item()
+        day_5_pred = preds[1].item()
         
         forecast_result = f"TimesFM Forecast: SCr on Day 4: {day_4_pred:.2f} mg/dL, Day 5: {day_5_pred:.2f} mg/dL."
         print(f"[Tool Response] {forecast_result}")

@@ -316,7 +316,7 @@ def _process_single_patient(
     days: int,
     base_seed: Optional[int],
     generate_report: bool,
-) -> Tuple[str, Optional[str], str]:
+) -> Tuple[str, Optional[str], str, str]:
     """
     Complete per-patient pipeline executed inside a worker process:
       1. Generate temporal trajectory.
@@ -334,11 +334,11 @@ def _process_single_patient(
         generate_report: Whether to render a markdown report.
 
     Returns:
-        Tuple of (jsonl_line, markdown_string_or_None, synthetic_id).
+        Tuple of (jsonl_line, markdown_string_or_None, synthetic_id, timesfm_line).
     """
     # Import textualization inside worker to avoid circular imports
     # and ensure the module is available in the subprocess.
-    from src.textualization import format_to_llm_jsonl, format_to_clinical_markdown
+    from src.textualization import format_to_llm_jsonl, format_to_clinical_markdown, format_to_timesfm_dataset
 
     seed = (base_seed + idx) if base_seed is not None else None
     trajectory = generate_temporal_record(patient, days=days, seed=seed)
@@ -352,7 +352,10 @@ def _process_single_patient(
     if generate_report:
         md_report = format_to_clinical_markdown(patient, trajectory)
 
-    return jsonl_line, md_report, patient['synthetic_id']
+    timesfm_payload = format_to_timesfm_dataset(patient, trajectory)
+    timesfm_line = json.dumps(timesfm_payload, ensure_ascii=False)
+
+    return jsonl_line, md_report, patient['synthetic_id'], timesfm_line
 
 
 # =============================================================================
@@ -407,6 +410,7 @@ def process_cohort_parallel(
     reports_dir = os.path.join(output_dir, "reports")
     os.makedirs(reports_dir, exist_ok=True)
     jsonl_path = os.path.join(output_dir, "llm_fine_tuning_dataset.jsonl")
+    timesfm_jsonl_path = os.path.join(output_dir, "timesfm_training_cohort.jsonl")
 
     # Counters
     n_written = 0
@@ -436,13 +440,15 @@ def process_cohort_parallel(
                 ncols=100,
             )
 
-        # Open JSONL file for streaming writes
-        with open(jsonl_path, "w", encoding="utf-8") as jsonl_file:
+        # Open JSONL files for streaming writes
+        with open(jsonl_path, "w", encoding="utf-8") as jsonl_file, \
+             open(timesfm_jsonl_path, "w", encoding="utf-8") as timesfm_file:
             for future in as_completed(futures):
-                jsonl_line, md_report, synthetic_id = future.result()
+                jsonl_line, md_report, synthetic_id, timesfm_line = future.result()
 
                 # Stream JSONL line to disk immediately
                 jsonl_file.write(jsonl_line + "\n")
+                timesfm_file.write(timesfm_line + "\n")
                 n_written += 1
 
                 # Capture first sample for preview
@@ -468,6 +474,7 @@ def process_cohort_parallel(
         "n_written": n_written,
         "n_reports": n_reports,
         "jsonl_path": jsonl_path,
+        "timesfm_jsonl_path": timesfm_jsonl_path,
         "reports_dir": reports_dir,
         "first_sample": first_sample,
     }

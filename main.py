@@ -163,6 +163,7 @@ def main():
     )
 
     print(f"  -> Streamed {result['n_written']} JSONL records to {result['jsonl_path']}")
+    print(f"  -> Streamed {result['n_written']} TimesFM records to {result['timesfm_jsonl_path']}")
     print(f"  -> Saved {result['n_reports']} clinical markdown reports to {result['reports_dir']}/")
 
     # -------------------------------------------------------------------------

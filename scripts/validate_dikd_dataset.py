@@ -25,7 +25,7 @@ from pathlib import Path
 VALID_LABELS = {"AKI_STAGE_1+", "NORMAL"}
 LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL)\]")
 
-EXPECTED_ROLES = ("user", "assistant")
+EXPECTED_ROLES = ("system", "user", "assistant")
 
 
 def load_jsonl(path: Path) -> list[tuple[int, dict]]:
@@ -56,8 +56,8 @@ def validate_row(record: dict, line_no: int) -> list[str]:
         errors.append(f"Line {line_no}: 'messages' must be an array")
         return errors
 
-    if len(messages) != 2:
-        errors.append(f"Line {line_no}: expected 2 messages (user/assistant), got {len(messages)}")
+    if len(messages) != 3:
+        errors.append(f"Line {line_no}: expected 3 messages (system/user/assistant), got {len(messages)}")
         return errors
 
     for i, expected_role in enumerate(EXPECTED_ROLES):
@@ -73,8 +73,8 @@ def validate_row(record: dict, line_no: int) -> list[str]:
             errors.append(f"Line {line_no}: messages[{i}] has empty content")
 
     # Validate assistant label
-    if len(messages) == 2 and isinstance(messages[1], dict):
-        assistant = messages[1].get("content", "")
+    if len(messages) == 3 and isinstance(messages[2], dict):
+        assistant = messages[2].get("content", "")
         label = extract_label(assistant)
         if label is None:
             errors.append(f"Line {line_no}: assistant response missing [AKI_STAGE_1+] or [NORMAL] tag")
@@ -110,8 +110,8 @@ def main() -> int:
 
         # Count labels
         messages = record.get("messages", [])
-        if len(messages) == 2:
-            label = extract_label(messages[1].get("content", ""))
+        if len(messages) == 3:
+            label = extract_label(messages[2].get("content", ""))
             if label:
                 label_counts[label] = label_counts.get(label, 0) + 1
             else:

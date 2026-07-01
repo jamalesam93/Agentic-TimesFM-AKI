@@ -30,8 +30,8 @@ def load_jsonl(path: Path) -> list[dict]:
 
 def extract_label(record: dict) -> str:
     messages = record.get("messages", [])
-    if len(messages) >= 2:
-        m = LABEL_RE.search(messages[1].get("content", ""))
+    if len(messages) >= 3:
+        m = LABEL_RE.search(messages[2].get("content", ""))
         if m:
             return m.group(1)
     return "UNKNOWN"

@@ -17,13 +17,13 @@ def format_to_llm_jsonl(patient: pd.Series, trajectory: List[Dict[str, Any]]) ->
     messages = []
     system_instruction = (
         "You are an AI-enabled clinical safety sentinel. Your task is to continuous-monitor "
-        "ICU patient trajectories and predict the imminent onset of Medication-Induced Kidney Injury.\n\n"
+        "ICU patient trajectories and predict the imminent onset of Medication-Induced Kidney Injury."
     )
+    messages.append({"role": "system", "content": system_instruction})
     
     # Construct the user timeline prompt
     comorb_str = ", ".join(patient.get('comorbidities', [])) if patient.get('comorbidities') else "None"
     user_prompt = (
-        f"{system_instruction}"
         f"Patient demographics: {patient['age']} yo, Sex: {patient['gender']}. "
         f"Comorbidities: {comorb_str}.\n"
         f"Baseline Serum Creatinine: {patient['baseline_scr']} mg/dL.\n"

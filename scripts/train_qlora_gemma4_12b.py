@@ -40,7 +40,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = SCRIPT_DIR.parent
 
 # --- Configuration ---
-BASE_MODEL = "google/gemma-2-9b-it"
+BASE_MODEL = "google/gemma-4-12b-it"
 MAX_SEQ_LENGTH = 512               # DIKD trajectories are ~350 tokens
 LORA_R = 16
 LORA_ALPHA = 32

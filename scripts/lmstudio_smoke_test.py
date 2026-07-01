@@ -53,8 +53,9 @@ def main() -> int:
         record = json.loads(first_line)
 
     messages = record["messages"]
-    user_prompt = messages[0]["content"]
-    gt_content = messages[1]["content"]
+    system_prompt = messages[0]["content"]
+    user_prompt = messages[1]["content"]
+    gt_content = messages[2]["content"]
 
     print("=" * 60)
     print("  DIKD SENTINEL SMOKE TEST")
@@ -62,8 +63,8 @@ def main() -> int:
     print(f"  Target Endpoint: {args.base_url}")
     print(f"  Target Model   : {args.model}")
     print("-" * 60)
-    print("  User Prompt Summary:")
-    print(f"    {user_prompt[:120]}...")
+    print("  System Prompt Summary:")
+    print(f"    {system_prompt[:120]}...")
     print("\n  Patient Trajectory:")
     print(user_prompt)
     print("-" * 60)
@@ -80,6 +81,7 @@ def main() -> int:
     payload = {
         "model": args.model,
         "messages": [
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
         "temperature": 0.1,

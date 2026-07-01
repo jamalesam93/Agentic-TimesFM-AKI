@@ -83,7 +83,7 @@ def compute_timesfm_patch_loss(peft_model, context, target, covs=None):
     return loss
 
 def main():
-    data_path = "output/timesfm_training_cohort.jsonl"
+    data_path = "data/real_world/phd_proposal_timesfm_dataset.jsonl"
     
     if not os.path.exists(data_path):
         print(f"Dataset not found at {data_path}")
@@ -101,7 +101,7 @@ def main():
     
     # 2. Setup Optimizer
     optimizer = AdamW(peft_model.parameters(), lr=1e-4)
-    epochs = 5
+    epochs = 2 # Reduced for quick local test
     
     print(f"\nStarting LoRA Fine-Tuning for {epochs} epochs...")
     peft_model.train()
@@ -141,7 +141,7 @@ def main():
     print("\nFine-tuning complete!")
     
     # 4. Save the Adapter Weights
-    lora_output_dir = "output/lora_weights"
+    lora_output_dir = "exports/real_world/timesfm_lora"
     os.makedirs(lora_output_dir, exist_ok=True)
     peft_model.save_pretrained(lora_output_dir)
     print(f"Saved optimized LoRA adapters to {lora_output_dir}/")

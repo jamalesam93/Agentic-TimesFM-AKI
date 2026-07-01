@@ -22,17 +22,31 @@ def generate_dataset(n_patients=2000, seed=42):
     data_dir = os.path.join(root_dir, "data", "real_world")
     os.makedirs(data_dir, exist_ok=True)
     
-    jsonl_path = os.path.join(data_dir, "phd_proposal_sft_dataset.jsonl")
+    print(f"3. Generating temporal trajectories and writing LLM training data to {data_dir}...")
+    result = generator.process_cohort_parallel(
+        patients=synthetic_base,
+        output_dir=data_dir,
+        days=5,
+        base_seed=seed,
+        max_workers=os.cpu_count(),
+        save_reports=0,
+        show_progress=True,
+    )
     
-    print(f"3. Generating temporal trajectories and writing LLM training data to {jsonl_path}...")
-    with open(jsonl_path, "w", encoding="utf-8") as f:
-        for i, patient in enumerate(synthetic_base):
-            trajectory = generator.generate_temporal_record(patient, seed=seed + i)
-            llm_sample = format_to_llm_jsonl(patient, trajectory)
-            f.write(json.dumps(llm_sample) + "\n")
-            
-            if (i + 1) % 500 == 0:
-                print(f"   -> Processed {i + 1} / {n_patients} trajectories")
+    # Rename default names to the PhD expected names
+    old_llm = os.path.join(data_dir, "llm_fine_tuning_dataset.jsonl")
+    new_llm = os.path.join(data_dir, "phd_proposal_sft_dataset.jsonl")
+    if os.path.exists(old_llm):
+        if os.path.exists(new_llm):
+            os.remove(new_llm)
+        os.rename(old_llm, new_llm)
+        
+    old_timesfm = os.path.join(data_dir, "timesfm_training_cohort.jsonl")
+    new_timesfm = os.path.join(data_dir, "phd_proposal_timesfm_dataset.jsonl")
+    if os.path.exists(old_timesfm):
+        if os.path.exists(new_timesfm):
+            os.remove(new_timesfm)
+        os.rename(old_timesfm, new_timesfm)
 
     print("\nDataset generation complete! Ready for Phase 2 LLM Fine-Tuning.")
 

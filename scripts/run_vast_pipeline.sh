@@ -37,9 +37,16 @@ echo "=========================================================="
 # -------------------------------------------------------------------------
 # Stage 1: Build Holdout Set (if missing)
 # -------------------------------------------------------------------------
-echo -e "\n[Stage 1] Splitting synthetic dataset into 80/20 train/eval..."
-head -n 80 "$MASTER_FILE" > "$TRAIN_FILE"
-tail -n 20 "$MASTER_FILE" > "$EVAL_FILE"
+echo -e "\n[Stage 1] Splitting synthetic dataset dynamically (80% train, 20% eval)..."
+TOTAL_LINES=$(wc -l < "$MASTER_FILE")
+TRAIN_LINES=$(( TOTAL_LINES * 80 / 100 ))
+EVAL_LINES=$(( TOTAL_LINES - TRAIN_LINES ))
+
+if [ $TRAIN_LINES -le 0 ]; then TRAIN_LINES=1; fi
+if [ $EVAL_LINES -le 0 ]; then EVAL_LINES=1; fi
+
+head -n "$TRAIN_LINES" "$MASTER_FILE" > "$TRAIN_FILE"
+tail -n "$EVAL_LINES" "$MASTER_FILE" > "$EVAL_FILE"
 
 # -------------------------------------------------------------------------
 # Stage 2: Contamination Gate

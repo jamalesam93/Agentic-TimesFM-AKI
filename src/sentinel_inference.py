@@ -17,7 +17,10 @@ def get_timesfm_model():
     # Initialize the pre-trained TimesFM model from local directory
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     model_path = os.path.join(project_root, "timesfm-2.5-weights")
-    model = timesfm.TimesFM_2p5_200M_torch.from_pretrained(model_path)
+    model = timesfm.TimesFM_2p5_200M_torch.from_pretrained(
+        pretrained_model_name_or_path=model_path,
+        local_files_only=True
+    )
     
     # Attach LoRA weights if they exist
     lora_path = "output/lora_weights"

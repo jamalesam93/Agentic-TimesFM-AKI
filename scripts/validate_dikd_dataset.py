@@ -110,8 +110,8 @@ def main() -> int:
 
         # Count labels
         messages = record.get("messages", [])
-        if len(messages) == 3:
-            label = extract_label(messages[2].get("content", ""))
+        if len(messages) == 2:
+            label = extract_label(messages[1].get("content", ""))
             if label:
                 label_counts[label] = label_counts.get(label, 0) + 1
             else:

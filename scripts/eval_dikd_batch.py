@@ -114,13 +114,12 @@ def main() -> int:
 
     for i, row in enumerate(eval_rows):
         messages = row["messages"]
-        # Ground truth from the assistant message
-        gt_label = extract_label(messages[2]["content"])
+        # Ground truth from the assistant message (index 1 in 2-message format)
+        gt_label = extract_label(messages[1]["content"])
 
-        # Send only system + user messages (no assistant — model must predict)
+        # Send only the user message (no assistant — model must predict)
         inference_messages = [
             {"role": messages[0]["role"], "content": messages[0]["content"]},
-            {"role": messages[1]["role"], "content": messages[1]["content"]},
         ]
 
         raw_response = ""

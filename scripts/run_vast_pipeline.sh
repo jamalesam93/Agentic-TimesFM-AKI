@@ -15,8 +15,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-TRAIN_FILE="$PROJECT_DIR/output/llm_fine_tuning_dataset.jsonl"
-EVAL_FILE="$PROJECT_DIR/output/llm_fine_tuning_dataset.jsonl"  # Using same for demo, build_holdout.py will handle if missing
+MASTER_FILE="$PROJECT_DIR/output/llm_fine_tuning_dataset.jsonl"
+TRAIN_FILE="$PROJECT_DIR/output/train_split.jsonl"
+EVAL_FILE="$PROJECT_DIR/output/eval_split.jsonl"
 OUTPUT_DIR="$PROJECT_DIR/outputs/dikd-gemma-12b"
 MERGED_DIR="$PROJECT_DIR/exports/dikd-gemma4-12b-merged-bf16"
 GGUF_F16="$PROJECT_DIR/exports/dikd-gemma4-12b-f16.gguf"
@@ -37,10 +38,11 @@ echo "=========================================================="
 # Stage 1: Build Holdout Set (if missing)
 # -------------------------------------------------------------------------
 if [ ! -f "$EVAL_FILE" ]; then
-    echo -e "\n[Stage 1] Holdout dataset missing. Generating..."
-    python "$SCRIPT_DIR/build_holdout.py" --n 200 --seed 9999 --out "$EVAL_FILE"
+    echo -e "\n[Stage 1] Splitting synthetic dataset into 80/20 train/eval..."
+    head -n 80 "$MASTER_FILE" > "$TRAIN_FILE"
+    tail -n 20 "$MASTER_FILE" > "$EVAL_FILE"
 else
-    echo -e "\n[Stage 1] Holdout dataset already exists: $EVAL_FILE"
+    echo -e "\n[Stage 1] Dataset splits already exist."
 fi
 
 # -------------------------------------------------------------------------

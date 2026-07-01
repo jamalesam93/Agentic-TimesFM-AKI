@@ -5,23 +5,23 @@
 - **Patient ID**: SYN_00001
 - **Age**: 53 years
 - **Gender**: Male
-- **Baseline Serum Creatinine (SCr)**: 1.04 mg/dL
+- **Baseline Serum Creatinine (SCr)**: 0.96 mg/dL
 
 ## 2. Longitudinal Temporal ICU Flowsheet
 | Day | MAP (mmHg) | Vanco Active | Zosyn Active | Vanco Trough (ug/mL) | SCr (mg/dL) | Risk State |
 |:---:|:----------:|:------------:|:------------:|:--------------------:|:----------:|:----------:|
-| Day 1 | 71 | False | False | 0.0 | 1.02 | **NORMAL** |
-| Day 2 | 79 | False | False | 0.0 | 1.01 | **NORMAL** |
-| Day 3 | 76 | False | False | 0.0 | 1.07 | **NORMAL** |
-| Day 4 | 81 | False | False | 0.0 | 1.06 | **NORMAL** |
-| Day 5 | 71 | False | False | 0.0 | 1.07 | **NORMAL** |
+| Day 1 | 71 | False | False | 0.0 | 0.94 | **NORMAL** |
+| Day 2 | 79 | False | True | 0.0 | 0.93 | **NORMAL** |
+| Day 3 | 76 | False | True | 0.0 | 0.99 | **NORMAL** |
+| Day 4 | 81 | False | True | 0.0 | 0.98 | **NORMAL** |
+| Day 5 | 71 | False | True | 0.0 | 0.99 | **NORMAL** |
 
 ## 3. Clinical Synthesis & Risk Profile
 - **Vancomycin Exposure**: No
-- **Zosyn (Pip/Tazo) Exposure**: No
-- **Nephrotoxic Risk Assessment**: LOW RISK. No exposure to nephrotoxic study drugs.
+- **Zosyn (Pip/Tazo) Exposure**: Yes
+- **Nephrotoxic Risk Assessment**: LOW-TO-MODERATE RISK. Patient received Zosyn monotherapy. SCr should be monitored periodically.
 - **AKI Outcome Status**: `NORMAL RENAL FUNCTION PRESERVED`
-- **Final Serum Creatinine**: 1.07 mg/dL (Baseline: 1.04 mg/dL)
+- **Final Serum Creatinine**: 0.99 mg/dL (Baseline: 0.96 mg/dL)
 - **Max SCr fold-increase**: 1.03x baseline
 
 ------------------------------------------------------------

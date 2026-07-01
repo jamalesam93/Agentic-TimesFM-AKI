@@ -82,8 +82,8 @@ pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 # 2. Install training deps with --no-deps so they don't override Unsloth's versions
 pip install --no-deps trl peft accelerate bitsandbytes transformers datasets
 
-# 3. Gemma 4 requires torchvision for its vision processor loader
-pip install torchvision
+# 3. Gemma 4 requires torchvision for its vision processor loader. Also install timesfm.
+pip install torchvision timesfm
 
 # 3. Upgrade huggingface_hub (needed for gated model access)
 pip install -U "huggingface_hub[cli]"
@@ -139,20 +139,23 @@ Return to the repository directory, activate the venv, and run the orchestrator 
 cd ~/AKI-training
 source .venv/bin/activate
 
-# Make the pipeline executable
-chmod +x scripts/run_vast_pipeline.sh
+# 1. Run the TimesFM Fine-Tuning (Phase 1)
+python src/finetune_timesfm.py
 
-# Run the complete pipeline (Stage 1 to Stage 7)
-LLAMA_CPP_PATH=~/llama.cpp bash scripts/run_vast_pipeline.sh
+# 2. Make the LLM pipeline executable
+chmod +x scripts/real_world/run_phd_phase2_pipeline_real.sh
+
+# 3. Run the LLM complete pipeline (Phase 2)
+LLAMA_CPP_PATH=~/llama.cpp bash scripts/real_world/run_phd_phase2_pipeline_real.sh
 ```
 
 ### What happens when you run this script?
-1. **Stage 1**: Splits the generated data into train (`output/train_split.jsonl`) and eval (`output/eval_split.jsonl`).
-2. **Stage 2-3**: Performs data quality validation and summarizes label distribution.
-3. **Stage 4**: Initiates QLoRA fine-tuning. It trains for 2 epochs, saving the final adapter to `outputs/dikd-gemma4-12b/lora_adapter`.
-4. **Stage 5**: Loads the base Gemma 12B model in full bf16 precision, merges the adapter, and saves the standalone merged model to `exports/dikd-gemma4-12b-merged-bf16`.
-5. **Stage 6**: Converts the merged weights to GGUF format and quantizes them to Q6_K layout (`exports/dikd-gemma4-12b-q6_k.gguf`).
-6. **Stage 7**: Spins up the `llama-server` in the background on port `1234`, runs `eval_dikd_batch.py` to evaluate the validation set, and prints the clinical tier gates output.
+1. **Stage 1**: Automatically runs `generate_llm_dataset_real.py` to securely synthesize the real-world HDHI parameters into the `phd_proposal_sft_dataset.jsonl` if it doesn't already exist.
+2. **Stage 2-4**: Performs data contamination checks, schema validation, and summarizes label distribution.
+3. **Stage 5**: Initiates QLoRA fine-tuning. It trains the LLM on the real-world cohort and saves the adapter to `outputs/real_world/phd-gemma-12b/lora_adapter`.
+4. **Stage 6**: Loads the base Gemma 12B model in full bf16 precision, merges the adapter, and saves the standalone merged model to `exports/real_world/phd-gemma-12b-merged-bf16`.
+5. **Stage 7**: Converts the merged weights to GGUF format and quantizes them to Q6_K layout (`exports/real_world/phd-gemma-12b-q6_k.gguf`).
+6. **Stage 8**: Spins up the `llama-server` in the background on port `1235`, runs `eval_dikd_batch.py` to evaluate the real-world validation set, and prints the clinical tier gates output.
 
 ---
 
@@ -164,12 +167,12 @@ Open a **new terminal window on your local machine** and run:
 
 ### 1. Download the Quantized Model (`.gguf`)
 ```bash
-scp -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/exports/dikd-gemma4-12b-q6_k.gguf ./
+scp -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/exports/real_world/phd-gemma-12b-q6_k.gguf ./
 ```
 
 ### 2. Download the Reports and Metrics
 ```bash
-scp -r -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/reports/ ./
+scp -r -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/reports/real_world/ ./
 ```
 
 ---

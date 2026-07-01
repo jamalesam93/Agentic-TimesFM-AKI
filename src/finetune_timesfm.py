@@ -101,7 +101,7 @@ def main():
     
     # 2. Setup Optimizer
     optimizer = AdamW(peft_model.parameters(), lr=1e-4)
-    epochs = 2 # Reduced for quick local test
+    epochs = 5 # Production epochs
     
     print(f"\nStarting LoRA Fine-Tuning for {epochs} epochs...")
     peft_model.train()

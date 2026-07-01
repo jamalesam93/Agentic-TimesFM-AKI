@@ -19,7 +19,7 @@ def get_timesfm_model():
     model = timesfm.TimesFM_2p5_200M_torch.from_pretrained(model_path)
     
     # Attach LoRA weights if they exist
-    lora_path = "output/lora_weights"
+    lora_path = "exports/real_world/timesfm_lora"
     if os.path.exists(lora_path):
         print(f"Attaching specialized LoRA weights from {lora_path}...")
         pytorch_module = getattr(model, 'model', model)

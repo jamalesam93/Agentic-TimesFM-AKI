@@ -40,7 +40,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = SCRIPT_DIR.parent
 
 # --- Configuration ---
-BASE_MODEL = "google/gemma-4-12b-it"
+BASE_MODEL = "google/gemma-2-9b-it"
 MAX_SEQ_LENGTH = 512               # DIKD trajectories are ~350 tokens
 LORA_R = 16
 LORA_ALPHA = 32
@@ -266,8 +266,8 @@ def main() -> int:
     parser.add_argument(
         "--train-file",
         type=Path,
-        default=PROJECT_DIR / "output" / "dikd_training_data_10k.jsonl",
-        help="Training JSONL file (default: output/dikd_training_data_10k.jsonl)",
+        default=PROJECT_DIR / "output" / "llm_fine_tuning_dataset.jsonl",
+        help="Training JSONL file (default: output/llm_fine_tuning_dataset.jsonl)",
     )
     parser.add_argument(
         "--output-dir",

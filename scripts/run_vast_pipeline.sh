@@ -15,9 +15,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-TRAIN_FILE="$PROJECT_DIR/output/dikd_training_data_10k.jsonl"
-EVAL_FILE="$PROJECT_DIR/data/eval_holdout.jsonl"
-OUTPUT_DIR="$PROJECT_DIR/outputs/dikd-gemma4-12b"
+TRAIN_FILE="$PROJECT_DIR/output/llm_fine_tuning_dataset.jsonl"
+EVAL_FILE="$PROJECT_DIR/output/llm_fine_tuning_dataset.jsonl"  # Using same for demo, build_holdout.py will handle if missing
+OUTPUT_DIR="$PROJECT_DIR/outputs/dikd-gemma-12b"
 MERGED_DIR="$PROJECT_DIR/exports/dikd-gemma4-12b-merged-bf16"
 GGUF_F16="$PROJECT_DIR/exports/dikd-gemma4-12b-f16.gguf"
 GGUF_Q6_K="$PROJECT_DIR/exports/dikd-gemma4-12b-q6_k.gguf"

@@ -1,11 +1,101 @@
 synthetic_id,age,gender,baseline_scr,comorbidities,received_vanco,received_zosyn,developed_aki
-SYN_00000,67,M,0.85,['Hypertension'],False,True,False
-SYN_00001,59,M,0.97,[],False,True,False
-SYN_00002,69,M,0.79,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,False
-SYN_00003,81,M,1.14,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,True
-SYN_00004,58,M,0.73,[],True,False,True
-SYN_00005,58,M,1.97,"['Hypertension', 'Chronic Kidney Disease Stage 3']",True,False,True
-SYN_00006,81,M,1.24,['Type 2 Diabetes Mellitus'],False,True,True
-SYN_00007,71,M,1.11,['Hypertension'],False,False,False
-SYN_00008,54,M,0.79,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,True
-SYN_00009,68,M,0.72,[],True,False,True
+SYN_00000,62,M,1.31,"['Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 2']",True,True,True
+SYN_00001,53,M,1.04,['Hypertension'],False,False,False
+SYN_00002,64,M,1.16,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00003,77,M,1.36,"['Hypertension', 'Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 2']",True,True,True
+SYN_00004,52,F,1.16,"['Hypertension', 'Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 2']",True,False,True
+SYN_00005,52,M,0.94,['Type 2 Diabetes Mellitus'],False,True,False
+SYN_00006,78,M,1.28,"['Hypertension', 'Chronic Kidney Disease Stage 2']",True,False,True
+SYN_00007,66,M,0.98,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00008,48,M,0.73,[],True,False,True
+SYN_00009,63,F,1.82,"['Hypertension', 'Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 3']",True,False,False
+SYN_00010,48,F,1.1,['Chronic Kidney Disease Stage 2'],True,True,True
+SYN_00011,48,M,0.9,[],True,False,False
+SYN_00012,59,M,0.96,['Type 2 Diabetes Mellitus'],False,True,False
+SYN_00013,27,M,0.76,[],False,False,False
+SYN_00014,30,M,0.77,['Hypertension'],True,True,True
+SYN_00015,47,M,0.86,[],False,True,True
+SYN_00016,40,M,0.67,[],True,True,True
+SYN_00017,60,M,0.86,['Type 2 Diabetes Mellitus'],False,False,False
+SYN_00018,42,M,0.77,['Type 2 Diabetes Mellitus'],False,False,False
+SYN_00019,35,M,1.15,['Chronic Kidney Disease Stage 2'],False,False,False
+SYN_00020,76,F,0.8,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,True,False
+SYN_00021,52,M,0.74,['Hypertension'],False,False,False
+SYN_00022,56,M,1.14,['Type 2 Diabetes Mellitus'],False,True,False
+SYN_00023,34,M,0.94,['Type 2 Diabetes Mellitus'],True,False,False
+SYN_00024,47,F,0.91,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,True,True
+SYN_00025,57,M,1.09,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00026,38,M,1.76,"['Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 3']",False,True,False
+SYN_00027,61,F,0.85,['Type 2 Diabetes Mellitus'],False,False,True
+SYN_00028,46,M,1.35,['Chronic Kidney Disease Stage 2'],False,False,False
+SYN_00029,51,M,1.33,"['Hypertension', 'Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 2']",False,True,False
+SYN_00030,46,M,0.72,[],True,False,True
+SYN_00031,82,M,1.01,['Type 2 Diabetes Mellitus'],True,False,False
+SYN_00032,55,M,0.98,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,True
+SYN_00033,40,M,1.03,[],False,False,False
+SYN_00034,67,M,0.93,[],True,True,True
+SYN_00035,37,F,0.62,[],False,False,False
+SYN_00036,58,M,0.84,[],False,True,False
+SYN_00037,27,M,0.82,[],False,True,False
+SYN_00038,36,M,0.97,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,False
+SYN_00039,58,M,0.98,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,False
+SYN_00040,66,M,1.4,"['Hypertension', 'Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 2']",True,True,True
+SYN_00041,58,M,0.87,['Type 2 Diabetes Mellitus'],False,True,False
+SYN_00042,53,M,1.98,"['Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 3']",True,False,False
+SYN_00043,51,M,1.18,[],True,True,True
+SYN_00044,34,M,0.95,['Type 2 Diabetes Mellitus'],False,True,True
+SYN_00045,45,M,0.79,['Type 2 Diabetes Mellitus'],True,True,True
+SYN_00046,48,M,1.47,['Chronic Kidney Disease Stage 3'],True,False,False
+SYN_00047,70,M,0.77,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,True
+SYN_00048,60,F,0.68,[],False,True,False
+SYN_00049,30,M,0.76,['Type 2 Diabetes Mellitus'],False,True,False
+SYN_00050,60,M,0.78,['Type 2 Diabetes Mellitus'],False,True,False
+SYN_00051,50,M,0.77,['Hypertension'],False,False,False
+SYN_00052,45,F,0.71,['Hypertension'],True,True,True
+SYN_00053,64,F,0.69,['Hypertension'],True,True,True
+SYN_00054,70,M,1.17,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,False
+SYN_00055,69,M,0.76,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00056,43,F,1.82,"['Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 3']",False,False,False
+SYN_00057,51,M,0.94,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,True,True
+SYN_00058,60,M,0.91,['Hypertension'],True,True,True
+SYN_00059,69,M,1.21,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00060,48,M,0.73,['Hypertension'],True,False,False
+SYN_00061,52,F,0.78,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,False
+SYN_00062,39,F,1.04,['Type 2 Diabetes Mellitus'],False,False,False
+SYN_00063,38,M,1.09,['Hypertension'],False,True,False
+SYN_00064,67,M,1.12,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,False
+SYN_00065,75,M,1.17,"['Hypertension', 'Chronic Kidney Disease Stage 2']",False,True,True
+SYN_00066,54,M,0.82,[],False,True,False
+SYN_00067,70,F,1.46,"['Hypertension', 'Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 3']",True,False,True
+SYN_00068,60,F,0.69,['Hypertension'],False,True,False
+SYN_00069,46,F,0.91,['Hypertension'],False,True,False
+SYN_00070,60,M,1.16,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00071,77,M,1.01,['Hypertension'],True,True,True
+SYN_00072,55,M,0.98,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00073,78,F,0.78,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,False
+SYN_00074,18,M,1.0,['Type 2 Diabetes Mellitus'],True,True,False
+SYN_00075,67,M,1.33,['Chronic Kidney Disease Stage 2'],False,False,False
+SYN_00076,56,M,0.79,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,False
+SYN_00077,51,M,0.84,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00078,56,M,0.9,[],True,True,True
+SYN_00079,26,M,0.89,['Type 2 Diabetes Mellitus'],True,True,True
+SYN_00080,52,M,0.81,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,False,False
+SYN_00081,60,M,0.76,['Hypertension'],False,True,False
+SYN_00082,76,M,1.04,['Hypertension'],True,False,False
+SYN_00083,48,M,0.82,[],False,True,True
+SYN_00084,43,M,1.35,['Chronic Kidney Disease Stage 2'],False,False,False
+SYN_00085,48,M,1.13,['Chronic Kidney Disease Stage 2'],False,False,False
+SYN_00086,68,M,1.01,"['Hypertension', 'Type 2 Diabetes Mellitus']",False,True,False
+SYN_00087,60,F,0.68,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,False
+SYN_00088,47,M,0.91,['Hypertension'],True,False,False
+SYN_00089,63,F,1.03,"['Hypertension', 'Chronic Kidney Disease Stage 2']",True,True,True
+SYN_00090,56,M,0.96,['Hypertension'],False,False,False
+SYN_00091,69,M,0.74,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,True
+SYN_00092,45,M,0.84,['Type 2 Diabetes Mellitus'],True,False,False
+SYN_00093,50,M,0.75,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,False,False
+SYN_00094,49,M,0.71,['Type 2 Diabetes Mellitus'],False,True,False
+SYN_00095,34,M,1.14,[],False,True,False
+SYN_00096,59,F,0.76,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,True,False
+SYN_00097,59,M,1.1,['Hypertension'],True,False,False
+SYN_00098,55,F,1.4,"['Hypertension', 'Type 2 Diabetes Mellitus', 'Chronic Kidney Disease Stage 3']",False,False,False
+SYN_00099,52,M,0.81,"['Hypertension', 'Type 2 Diabetes Mellitus']",True,True,False

@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.sentinel_inference import get_timesfm_model
 import numpy as np
 
-def run_agentic_pipeline(model_id="gemma4_unified", lora_weights_path="output/gemma4-12b-aki"):
+def run_agentic_pipeline(model_id="gemma4_unified", lora_weights_path="outputs/dikd-gemma4-12b/lora_adapter"):
     print("=== Loading TimesFM Sentinel Model ===")
     timesfm_model = get_timesfm_model()
 

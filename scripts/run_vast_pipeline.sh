@@ -37,13 +37,9 @@ echo "=========================================================="
 # -------------------------------------------------------------------------
 # Stage 1: Build Holdout Set (if missing)
 # -------------------------------------------------------------------------
-if [ ! -f "$EVAL_FILE" ]; then
-    echo -e "\n[Stage 1] Splitting synthetic dataset into 80/20 train/eval..."
-    head -n 80 "$MASTER_FILE" > "$TRAIN_FILE"
-    tail -n 20 "$MASTER_FILE" > "$EVAL_FILE"
-else
-    echo -e "\n[Stage 1] Dataset splits already exist."
-fi
+echo -e "\n[Stage 1] Splitting synthetic dataset into 80/20 train/eval..."
+head -n 80 "$MASTER_FILE" > "$TRAIN_FILE"
+tail -n 20 "$MASTER_FILE" > "$EVAL_FILE"
 
 # -------------------------------------------------------------------------
 # Stage 2: Contamination Gate

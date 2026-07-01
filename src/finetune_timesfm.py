@@ -10,8 +10,8 @@ def get_peft_timesfm():
     import timesfm
     torch.set_float32_matmul_precision("high")
     
-    # Load TimesFM 2.5 Base Model from local directory
-    model_path = r"E:\Antigravity Projects\AKI-training\timesfm-2.5-weights"
+    # Load TimesFM 2.5 Base Model from Hugging Face
+    model_path = "google/timesfm-2.5-200m-pytorch"
     base_model = timesfm.TimesFM_2p5_200M_torch.from_pretrained(model_path)
     
     # Configure LoRA to target the Transformer attention mechanism

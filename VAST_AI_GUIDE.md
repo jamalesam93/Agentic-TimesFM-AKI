@@ -67,19 +67,33 @@ cd AKI-training
 ```
 
 ### 3. Install Python Dependencies
-Unsloth is highly optimized for fast SFT and lower memory usage. Set up the dependencies as follows:
+Unsloth must control the PyTorch and Triton installation. Installing PyTorch separately causes version conflicts. Follow this exact order:
 ```bash
-# Update pip
-pip install --upgrade pip
+# Create a virtual environment (keeps system packages clean)
+python3 -m venv .venv
+source .venv/bin/activate
 
-# Install PyTorch and Torchaudio/Torchvision (matching the CUDA version)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# Upgrade pip
+pip install -U pip
 
-# Install Unsloth (this automatically pulls down compatible versions of trl, peft, and transformers)
-pip install --no-cache-dir "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+# 1. Install Unsloth FIRST — it pulls compatible PyTorch, Triton, etc.
+pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 
-# Install remaining required packages without overwriting core dependencies
-pip install --no-cache-dir datasets bitsandbytes accelerate
+# 2. Install training deps with --no-deps so they don't override Unsloth's versions
+pip install --no-deps trl peft accelerate bitsandbytes transformers datasets
+
+# 3. Upgrade huggingface_hub (needed for gated model access)
+pip install -U "huggingface_hub[cli]"
+
+# 4. Upgrade unsloth-zoo
+pip install --upgrade unsloth-zoo
+
+# 5. Pin transformers to a known-good version for Gemma 4
+pip install --upgrade --force-reinstall "transformers==5.10.2"
+
+# 6. Reinstall Unsloth on top (--no-deps so it doesn't break the transformers pin)
+pip install --upgrade --force-reinstall --no-deps \
+  "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 ```
 
 ### 4. Authenticate with Hugging Face
@@ -117,9 +131,10 @@ Verify that the binaries `llama-quantize` and `llama-server` exist in `~/llama.c
 
 ## 🏃 Step 5: Run the End-to-End Pipeline
 
-Return to the repository directory and run the orchestrator script:
+Return to the repository directory, activate the venv, and run the orchestrator script:
 ```bash
 cd ~/AKI-training
+source .venv/bin/activate
 
 # Make the pipeline executable
 chmod +x scripts/run_vast_pipeline.sh

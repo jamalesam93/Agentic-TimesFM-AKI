@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL)\]")
+LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL|AKI_IMMINENT)\]")
 
 # Acceptable class balance range (AKI proportion)
 MIN_AKI_RATIO = 0.10  # At least 10% AKI cases
@@ -33,7 +33,9 @@ def extract_label(record: dict) -> str:
     if len(messages) >= 3:
         m = LABEL_RE.search(messages[2].get("content", ""))
         if m:
-            return m.group(1)
+            label = m.group(1)
+            # Normalize AKI_IMMINENT → AKI_STAGE_1+ for consistent counting
+            return "AKI_STAGE_1+" if label == "AKI_IMMINENT" else label
     return "UNKNOWN"
 
 

@@ -75,9 +75,11 @@ pip install --upgrade pip
 # Install PyTorch and Torchaudio/Torchvision (matching the CUDA version)
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Install Unsloth and other SFT/PEFT packages
+# Install Unsloth (this automatically pulls down compatible versions of trl, peft, and transformers)
 pip install --no-cache-dir "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
-pip install --no-cache-dir trl peft transformers datasets bitsandbytes accelerate
+
+# Install remaining required packages without overwriting core dependencies
+pip install --no-cache-dir datasets bitsandbytes accelerate
 ```
 
 ### 4. Authenticate with Hugging Face

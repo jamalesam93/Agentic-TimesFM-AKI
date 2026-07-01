@@ -22,8 +22,8 @@ import re
 import sys
 from pathlib import Path
 
-VALID_LABELS = {"AKI_STAGE_1+", "NORMAL"}
-LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL)\]")
+VALID_LABELS = {"AKI_STAGE_1+", "NORMAL", "AKI_IMMINENT"}
+LABEL_RE = re.compile(r"\[(AKI_STAGE_1\+|NORMAL|AKI_IMMINENT)\]")
 
 EXPECTED_ROLES = ("system", "user", "assistant")
 
@@ -77,7 +77,7 @@ def validate_row(record: dict, line_no: int) -> list[str]:
         assistant = messages[2].get("content", "")
         label = extract_label(assistant)
         if label is None:
-            errors.append(f"Line {line_no}: assistant response missing [AKI_STAGE_1+] or [NORMAL] tag")
+            errors.append(f"Line {line_no}: assistant response missing [AKI_STAGE_1+], [NORMAL], or [AKI_IMMINENT] tag")
 
     return errors
 

@@ -6,8 +6,9 @@ Unsloth-first with PEFT fallback. Adapted from the Nassila pipeline.
 
 IMPORTANT:
   - save_strategy="no": Unsloth + Gemma 4 pickles crash on Vast.ai
-    when trying to serialize mid-training checkpoints. Only the final
-    adapter is saved.
+    when trying to serialize mid-training checkpoints via Trainer.
+    We work around this with a custom LoRACheckpointCallback that
+    saves only the lightweight adapter weights every N steps.
   - 7 LoRA target modules: attention projections (q/k/v/o) + MLP
     (gate/up/down) for richer adaptation (~1% trainable params).
   - apply_chat_template(): ensures the model sees the exact Gemma chat
@@ -22,8 +23,10 @@ Usage (on Vast.ai after git clone):
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import os
+import time
 from pathlib import Path
 
 # Disable JIT/Dynamo recompilation checks and Unsloth graph compile overhead
@@ -49,6 +52,7 @@ BATCH_SIZE = 2
 GRAD_ACCUM = 8                     # Effective batch = 16
 NUM_EPOCHS = 2
 LEARNING_RATE = 1e-4
+CHECKPOINT_STEPS = 100             # Save LoRA adapter every N steps
 
 TARGET_MODULES = [
     "q_proj", "k_proj", "v_proj", "o_proj",  # Attention
@@ -56,12 +60,80 @@ TARGET_MODULES = [
 ]
 
 
+# ── Custom callback: saves LoRA adapter weights periodically ────
+# This bypasses Trainer's checkpoint serialization (which crashes
+# Unsloth + Gemma 4 on Vast.ai) by saving only the small adapter
+# weights via model.save_pretrained().
+class LoRACheckpointCallback:
+    """TrainerCallback that saves LoRA adapter weights every N steps.
+
+    Avoids the Unsloth/Gemma4 pickle crash by never going through
+    Trainer's full checkpoint serialization path.
+    """
+
+    def __init__(self, save_steps: int, output_dir: Path):
+        self.save_steps = save_steps
+        self.output_dir = output_dir
+
+    def on_step_end(self, args, state, control, model=None, **kwargs):
+        if (
+            self.save_steps > 0
+            and state.global_step > 0
+            and state.global_step % self.save_steps == 0
+        ):
+            ckpt_dir = self.output_dir / f"lora_checkpoint_step_{state.global_step}"
+            ckpt_dir.mkdir(parents=True, exist_ok=True)
+            model.save_pretrained(str(ckpt_dir))
+            print(f"  [Checkpoint] LoRA adapter saved at step {state.global_step} → {ckpt_dir.name}")
+
+
+class TrainingLogger:
+    """TrainerCallback that logs training metrics to a JSON Lines file."""
+
+    def __init__(self, log_path: Path):
+        self.log_path = log_path
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        # Clear any existing log
+        self.log_path.write_text("", encoding="utf-8")
+
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if logs:
+            entry = {
+                "step": state.global_step,
+                "epoch": round(state.epoch, 4) if state.epoch else 0,
+                **{k: round(v, 6) if isinstance(v, float) else v for k, v in logs.items()},
+            }
+            with self.log_path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
+
+
+def _make_callbacks(output_dir: Path, save_steps: int):
+    """Create the list of trainer callbacks."""
+    from transformers import TrainerCallback  # type: ignore
+
+    # Inherit from TrainerCallback so the Trainer recognizes them
+    class _LoRACheckpoint(TrainerCallback, LoRACheckpointCallback):
+        def __init__(self, save_steps, output_dir):
+            LoRACheckpointCallback.__init__(self, save_steps, output_dir)
+
+    class _TrainingLogger(TrainerCallback, TrainingLogger):
+        def __init__(self, log_path):
+            TrainingLogger.__init__(self, log_path)
+
+    callbacks = []
+    if save_steps > 0:
+        callbacks.append(_LoRACheckpoint(save_steps, output_dir))
+    callbacks.append(_TrainingLogger(output_dir / "training_log.jsonl"))
+    return callbacks
+
+
 def train_with_unsloth(
-    chat_file: Path,
+    train_file: Path,
     output_dir: Path,
     *,
     num_epochs: int,
     learning_rate: float,
+    save_steps: int,
 ) -> None:
     """Train using Unsloth (2x faster, 60% less VRAM)."""
     try:
@@ -97,8 +169,8 @@ def train_with_unsloth(
         use_gradient_checkpointing="unsloth",
     )
 
-    print(f"[3/4] Loading dataset from {chat_file}...")
-    dataset = load_dataset("json", data_files=str(chat_file), split="train")
+    print(f"[3/4] Loading dataset from {train_file}...")
+    dataset = load_dataset("json", data_files=str(train_file), split="train")
 
     # Apply Gemma chat template — this is critical for correct tokenization
     def formatting_func(examples):
@@ -116,6 +188,7 @@ def train_with_unsloth(
     print(f"  Loaded {len(dataset)} training sequences.")
 
     # save_strategy="no": Unsloth/Gemma4 crashes on checkpoint pickle on Vast.
+    # We use LoRACheckpointCallback instead to save adapter weights periodically.
     training_args = TrainingArguments(
         output_dir=str(output_dir),
         num_train_epochs=num_epochs,
@@ -142,10 +215,12 @@ def train_with_unsloth(
         max_seq_length=MAX_SEQ_LENGTH,
         packing=False,
         args=training_args,
+        callbacks=_make_callbacks(output_dir, save_steps),
     )
 
     print(f"\n[4/4] Training started (epochs={num_epochs}, lr={learning_rate}, "
           f"batch={BATCH_SIZE}x{GRAD_ACCUM}={BATCH_SIZE * GRAD_ACCUM})...")
+    print(f"  LoRA checkpoints every {save_steps} steps → {output_dir}")
     print("  Monitor GPU: watch -n 1 nvidia-smi")
     trainer.train()
 
@@ -157,11 +232,12 @@ def train_with_unsloth(
 
 
 def train_with_peft(
-    chat_file: Path,
+    train_file: Path,
     output_dir: Path,
     *,
     num_epochs: int,
     learning_rate: float,
+    save_steps: int,
 ) -> None:
     """Fallback: train using vanilla PEFT + BitsAndBytes (if Unsloth unavailable)."""
     try:
@@ -191,6 +267,7 @@ def train_with_peft(
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
 
     model = AutoModelForCausalLM.from_pretrained(
         BASE_MODEL,
@@ -214,8 +291,8 @@ def train_with_peft(
     trainable, total = model.get_nb_trainable_parameters()
     print(f"  Trainable: {trainable:,} / {total:,} ({100 * trainable / total:.2f}%)")
 
-    print(f"[3/4] Loading dataset from {chat_file}...")
-    dataset = load_dataset("json", data_files=str(chat_file), split="train")
+    print(f"[3/4] Loading dataset from {train_file}...")
+    dataset = load_dataset("json", data_files=str(train_file), split="train")
 
     def formatting_func(examples):
         texts = []
@@ -254,11 +331,14 @@ def train_with_peft(
         train_dataset=dataset,
         dataset_text_field="text",
         max_seq_length=MAX_SEQ_LENGTH,
+        packing=False,
         args=training_args,
+        callbacks=_make_callbacks(output_dir, save_steps),
     )
 
     print(f"\n[4/4] Training started (epochs={num_epochs}, lr={learning_rate}, "
           f"batch={BATCH_SIZE}x{GRAD_ACCUM}={BATCH_SIZE * GRAD_ACCUM})...")
+    print(f"  LoRA checkpoints every {save_steps} steps → {output_dir}")
     trainer.train()
 
     adapter_dir = output_dir / "lora_adapter"
@@ -289,6 +369,12 @@ def main() -> int:
     )
     parser.add_argument("--epochs", type=int, default=NUM_EPOCHS)
     parser.add_argument("--lr", type=float, default=LEARNING_RATE)
+    parser.add_argument(
+        "--save-steps",
+        type=int,
+        default=CHECKPOINT_STEPS,
+        help=f"Save LoRA adapter checkpoint every N steps (default: {CHECKPOINT_STEPS}, 0=disabled)",
+    )
     args = parser.parse_args()
 
     if not args.train_file.exists():
@@ -300,14 +386,15 @@ def main() -> int:
     print("=" * 60)
     print("  DIKD FINE-TUNING — Gemma 4 12B IT (QLoRA)")
     print("=" * 60)
-    print(f"  Base Model : {BASE_MODEL}")
-    print(f"  Backend    : {args.backend}")
-    print(f"  Train File : {args.train_file}")
-    print(f"  Output Dir : {args.output_dir}")
-    print(f"  Epochs     : {args.epochs}")
-    print(f"  LR         : {args.lr}")
-    print(f"  LoRA       : r={LORA_R}, α={LORA_ALPHA}, modules={len(TARGET_MODULES)}")
-    print(f"  Seq Length : {MAX_SEQ_LENGTH}")
+    print(f"  Base Model  : {BASE_MODEL}")
+    print(f"  Backend     : {args.backend}")
+    print(f"  Train File  : {args.train_file}")
+    print(f"  Output Dir  : {args.output_dir}")
+    print(f"  Epochs      : {args.epochs}")
+    print(f"  LR          : {args.lr}")
+    print(f"  LoRA        : r={LORA_R}, α={LORA_ALPHA}, modules={len(TARGET_MODULES)}")
+    print(f"  Seq Length  : {MAX_SEQ_LENGTH}")
+    print(f"  Checkpoints : every {args.save_steps} steps" if args.save_steps > 0 else "  Checkpoints : disabled")
     print("-" * 60)
 
     if args.backend == "unsloth":
@@ -316,6 +403,7 @@ def main() -> int:
             args.output_dir,
             num_epochs=args.epochs,
             learning_rate=args.lr,
+            save_steps=args.save_steps,
         )
     else:
         train_with_peft(
@@ -323,6 +411,7 @@ def main() -> int:
             args.output_dir,
             num_epochs=args.epochs,
             learning_rate=args.lr,
+            save_steps=args.save_steps,
         )
 
     print("\n" + "=" * 60)

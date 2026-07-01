@@ -146,11 +146,14 @@ def main() -> int:
             pred_label = "PARSE_FAIL"
 
         # Confusion matrix (AKI = positive class)
+        # PARSE_FAIL is treated conservatively:
+        #   - gt=AKI + PARSE_FAIL → FN (missed real AKI — clinically dangerous)
+        #   - gt=NORMAL + PARSE_FAIL → FP (system failure → counts against specificity)
         if gt_label == "AKI_STAGE_1+" and pred_label == "AKI_STAGE_1+":
             tp += 1
         elif gt_label == "NORMAL" and pred_label == "NORMAL":
             tn += 1
-        elif gt_label == "NORMAL" and pred_label == "AKI_STAGE_1+":
+        elif gt_label == "NORMAL" and pred_label != "NORMAL":
             fp += 1
         elif gt_label == "AKI_STAGE_1+" and pred_label != "AKI_STAGE_1+":
             fn += 1

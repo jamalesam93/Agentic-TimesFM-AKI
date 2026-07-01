@@ -82,6 +82,9 @@ pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 # 2. Install training deps with --no-deps so they don't override Unsloth's versions
 pip install --no-deps trl peft accelerate bitsandbytes transformers datasets
 
+# 3. Gemma 4 requires torchvision for its vision processor loader
+pip install torchvision
+
 # 3. Upgrade huggingface_hub (needed for gated model access)
 pip install -U "huggingface_hub[cli]"
 

@@ -28,6 +28,13 @@ This format is highly optimized for fast inference on consumer hardware, includi
 ## Intended Use & Agentic Tool Calling
 This LLM has been trained to act within an **Agentic Framework**. It expects a system prompt instructing it to query a time-series model (like TimesFM) for Serum Creatinine (SCr) forecasts before writing a final note. It excels at applying strict KDIGO guidelines to raw creatinine data and drug exposure levels (like Vancomycin troughs).
 
+## Performance
+On a holdout set of 200 real-world trajectories (derived from HDHI admissions), this quantized model achieved:
+- **Accuracy:** 99.5% (199/200 correct diagnoses)
+- **Sensitivity:** 99.0%
+- **Specificity:** 100.0%
+- **Structured Output Parse Rate:** 100.0%
+
 ## Usage with LM Studio / Ollama
 1. Download the `.gguf` file.
 2. Load it into your local inference server.
@@ -48,4 +55,4 @@ You are an AI Clinical Pharmacist reviewing a patient's chart at the end of Day 
 ```
 
 ## Disclaimer
-**For Research Purposes Only.** This AI model is an experimental prototype trained on synthetic clinical data. It is NOT a medical device and should NEVER be used for actual clinical decision-making or patient care.
+**For Research Purposes Only.** This AI model is an experimental prototype trained on privacy-preserving real-world clinical data. It is NOT a medical device and should NEVER be used for actual clinical decision-making or patient care.

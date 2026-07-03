@@ -50,26 +50,23 @@ def process_pipeline():
     
     with open(input_file, 'r', encoding='utf-8') as f:
         for idx, line in enumerate(f):
+            if idx >= 5: break # Just do the first 5 to make it fast and clean
             data = json.loads(line)
             messages = data.get("messages", [])
-            if not messages or len(messages) < 2:
+            if not messages or len(messages) < 3:
                 continue
                 
             print(f"Processing Patient {idx+1}...")
             
-            # Format using tokenizer chat template (system + user messages)
-            inference_messages = [
-                {"role": messages[0]["role"], "content": messages[0]["content"]},
-                {"role": messages[1]["role"], "content": messages[1]["content"]},
-            ]
-            prompt = tokenizer.apply_chat_template(inference_messages, tokenize=False, add_generation_prompt=True)
+            # Format using tokenizer chat template (including the assistant's final answer)
+            prompt = tokenizer.apply_chat_template(messages, tokenize=False)
             
             # Tokenize input
             inputs = tokenizer(prompt, return_tensors="pt").to(device)
             input_ids = inputs["input_ids"][0]
             tokens = [tokenizer.decode([tid]) for tid in input_ids]
             
-            # Run forward pass intercepting attention tensors
+            # Run forward pass
             with torch.no_grad():
                 outputs = model(
                     **inputs,
@@ -78,35 +75,60 @@ def process_pipeline():
                 )
             
             # Extract final layer attention weights
-            # outputs.attentions shape: (layers, batch, heads, seq, seq)
             attention_matrix = outputs.attentions[-1][0] # Get final layer, remove batch
             mean_attention = attention_matrix.mean(dim=0).cpu().float().numpy() # Average over heads
             
-            # Locate the prediction classification token (e.g. "AKI")
-            target_word = "AKI"
-            try:
-                target_idx = [i for i, t in enumerate(tokens) if target_word in t][0]
-            except IndexError:
-                target_idx = len(tokens) - 2 # Fallback to second to last token
+            # Find the index of the classification token ([AKI_STAGE_1+] or [NORMAL])
+            target_idx = None
+            for target_word in ["AKI_STAGE_1+", "NORMAL", "AKI_IMMINENT"]:
+                indices = [i for i, t in enumerate(tokens) if target_word in t]
+                if indices:
+                    target_idx = indices[-1]
+                    break
+            
+            if target_idx is None:
+                # Fallback to the last non-special token if classification label isn't found
+                target_idx = len(tokens) - 3
                 
-            # Slice the attention matrix specifically for the prediction token
-            attention_slice = mean_attention[target_idx, :target_idx+1].reshape(1, -1)
-            slice_tokens = tokens[:target_idx+1]
+            # Get the attention weights from our target classification token to all previous tokens
+            target_attention = mean_attention[target_idx, :target_idx+1]
+            
+            # Filter tokens: we only want to keep meaningful clinical tokens, 
+            # and ignore system prompt headers, punctuation, newlines, and template tags.
+            filtered_indices = []
+            stop_words = {"<", ">", "start_of_turn", "model", "user", "end_of_turn", "turn", "\n", " ", ":", ".", "[", "]", "|", ",", "You", "are", "an", "AI-enabled"}
+            
+            for i in range(target_idx + 1):
+                tok_str = tokens[i].strip()
+                if tok_str and not any(s in tok_str for s in stop_words):
+                    filtered_indices.append(i)
+            
+            # Get the top 20 most attended tokens from our filtered list
+            sorted_by_attn = sorted(filtered_indices, key=lambda x: target_attention[x], reverse=True)
+            top_n_indices = sorted_by_attn[:20]
+            
+            # Sort the selected indices chronologically so they read left-to-right in order of the prompt
+            top_n_indices.sort()
+            
+            attention_slice = target_attention[top_n_indices].reshape(1, -1)
+            slice_tokens = [tokens[i].strip() for i in top_n_indices]
 
             # 4. Generate Heatmap
-            plt.figure(figsize=(20, 5))
+            plt.figure(figsize=(12, 4))
             sns.heatmap(
                 attention_slice, 
                 xticklabels=slice_tokens, 
-                yticklabels=[f"Attention from '{tokens[target_idx].strip()}'"],
+                yticklabels=[f"Focus of '{tokens[target_idx].strip()}'"],
                 cmap="Oranges", 
                 cbar_kws={'label': 'Attention Weight'}, 
                 square=True, 
                 linewidths=0.5, 
-                linecolor='gray'
+                linecolor='gray',
+                annot=True,
+                fmt=".2f"
             )
             
-            plt.title(f"Patient {idx+1} Attention Mapping (Predicted: {tokens[target_idx].strip()})", fontsize=14, pad=15)
+            plt.title(f"Patient {idx+1} Causal Attention Mapping (Label: {tokens[target_idx].strip()})", fontsize=12, pad=15)
             plt.xticks(rotation=45, ha='right', fontsize=9)
             plt.yticks(rotation=0, fontsize=10, fontweight='bold')
             

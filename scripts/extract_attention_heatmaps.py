@@ -50,7 +50,6 @@ def process_pipeline():
     
     with open(input_file, 'r', encoding='utf-8') as f:
         for idx, line in enumerate(f):
-            if idx >= 5: break # Just do the first 5 to make it fast and clean
             data = json.loads(line)
             messages = data.get("messages", [])
             if not messages or len(messages) < 3:

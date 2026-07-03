@@ -81,7 +81,7 @@ def process_pipeline():
             
             # Find the index of the classification token ([AKI_STAGE_1+] or [NORMAL])
             target_idx = None
-            for target_word in ["AKI_STAGE_1+", "NORMAL", "AKI_IMMINENT"]:
+            for target_word in ["STAGE", "NORMAL", "IMMINENT"]:
                 indices = [i for i, t in enumerate(tokens) if target_word in t]
                 if indices:
                     target_idx = indices[-1]

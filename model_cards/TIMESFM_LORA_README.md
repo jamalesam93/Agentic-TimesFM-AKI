@@ -45,7 +45,7 @@ model_path = "google/timesfm-2.5-200m-pytorch"
 base_model = timesfm.TimesFM_2p5_200M_torch.from_pretrained(model_path)
 
 # 2. Attach these LoRA weights
-adapter_path = "jamalesam93/phd-timesfm-2.5-aki-lora"
+adapter_path = "QinEmPeRoR93/phd-timesfm-2.5-aki-lora"
 pytorch_module = getattr(base_model, 'model', base_model)
 pytorch_module = PeftModel.from_pretrained(pytorch_module, adapter_path)
 base_model.model = pytorch_module

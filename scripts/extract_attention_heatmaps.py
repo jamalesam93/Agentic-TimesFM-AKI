@@ -24,15 +24,21 @@ def main():
     # NOTE: We use device_map="auto" to automatically spread across available GPUs
     # torch_dtype=torch.float16 ensures we don't blow up the VRAM.
     
-    # tokenizer = AutoTokenizer.from_pretrained(model_id)
-    # model = AutoModelForCausalLM.from_pretrained(
-    #     model_id, 
+    # from peft import PeftModel
+    # 
+    # base_model_id = "google/gemma-4-12b"
+    # adapter_id = "QinEmPeRoR93/phd-gemma-4-12b-aki-lora"
+    # 
+    # tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+    # base_model = AutoModelForCausalLM.from_pretrained(
+    #     base_model_id, 
     #     device_map="auto", 
     #     torch_dtype=torch.float16
     # )
+    # model = PeftModel.from_pretrained(base_model, adapter_id)
     
     print("[SIMULATION MODE] Running heatmap generation logic using mock attention vectors...")
-    print("This script is designed to be executed on your future Vast.ai instance where you will uncomment the model loading code.")
+    print("This script is designed to be executed on your future Vast.ai instance where you will uncomment the PEFT model loading code.")
     
     # 2. Define a Patient Trajectory
     patient_text = (

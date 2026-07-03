@@ -44,7 +44,7 @@ def chat_completion(
     api_key: str = "lm-studio",
     temperature: float = 0.1,
     timeout: int = 180,
-) -> str:
+) -> tuple[str, dict | None]:
     url = f"{base_url.rstrip('/')}/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
@@ -54,11 +54,15 @@ def chat_completion(
         "model": model,
         "messages": messages,
         "temperature": temperature,
+        "logprobs": True,
+        "top_logprobs": 5,
     }
     resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
     resp.raise_for_status()
-    content = resp.json().get("choices", [{}])[0].get("message", {}).get("content", "")
-    return content
+    choice = resp.json().get("choices", [{}])[0]
+    content = choice.get("message", {}).get("content", "")
+    logprobs = choice.get("logprobs")
+    return content, logprobs
 
 
 def extract_label(text: str) -> str | None:
@@ -124,9 +128,10 @@ def main() -> int:
         ]
 
         raw_response = ""
+        logprobs_data = None
         for attempt in range(args.retry + 1):
             try:
-                raw_response = chat_completion(
+                raw_response, logprobs_data = chat_completion(
                     args.base_url, args.model, inference_messages, args.api_key
                 )
                 break
@@ -134,6 +139,7 @@ def main() -> int:
                 if attempt == args.retry:
                     print(f"  [{i + 1}/{len(eval_rows)}] FAILED after {args.retry + 1} attempts: {e}")
                     raw_response = ""
+                    logprobs_data = None
                 else:
                     time.sleep(2)
 
@@ -164,6 +170,7 @@ def main() -> int:
             "predicted": pred_label,
             "raw_response": raw_response[:500],
             "correct": gt_label == pred_label,
+            "logprobs": logprobs_data,
         })
 
         if (i + 1) % 10 == 0:

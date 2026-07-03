@@ -39,7 +39,7 @@ Evaluated on 200 privacy-preserving real-world trajectories (HDHI admissions):
 * **Specificity (True Negative Rate):** 100.0%
 * **F1 Score:** 99.5%
 
-*Note: High sensitivity is achieved specifically because this model was trained to ingest the forecasts from the companion `jamalesam93/phd-timesfm-2.5-aki-lora` adapter.*
+*Note: High sensitivity is achieved specifically because this model was trained to ingest the forecasts from the companion `QinEmPeRoR93/phd-timesfm-2.5-aki-lora` adapter.*
 
 ## How to use
 This is a LoRA adapter. You must load the base model and apply these weights using the `peft` library.
@@ -50,7 +50,7 @@ from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 base_model_name = "google/gemma-4-12b-it"
-adapter_name = "jamalesam93/phd-gemma-4-12b-aki-lora"
+adapter_name = "QinEmPeRoR93/phd-gemma-4-12b-aki-lora"
 
 model = AutoModelForCausalLM.from_pretrained(
     base_model_name,

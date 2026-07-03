@@ -34,7 +34,8 @@ def process_pipeline():
     base_model = AutoModelForCausalLM.from_pretrained(
         base_model_name, 
         device_map="auto", 
-        torch_dtype=torch.float16
+        torch_dtype=torch.float16,
+        attn_implementation="eager"
     )
     
     print(f"Fusing PEFT adapter: {adapter_name}...")

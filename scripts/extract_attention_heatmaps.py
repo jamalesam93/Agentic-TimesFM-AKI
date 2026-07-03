@@ -76,7 +76,9 @@ def process_pipeline():
             
             # Extract final layer attention weights
             attention_matrix = outputs.attentions[-1][0] # Get final layer, remove batch
-            mean_attention = attention_matrix.mean(dim=0).cpu().float().numpy() # Average over heads
+            
+            # Use max across heads to capture specific head focus (prevents dilution from sink heads)
+            max_attention = attention_matrix.max(dim=0)[0].cpu().float().numpy() # Shape: [seq, seq]
             
             # Find the index of the classification token ([AKI_STAGE_1+] or [NORMAL])
             target_idx = None
@@ -91,16 +93,24 @@ def process_pipeline():
                 target_idx = len(tokens) - 3
                 
             # Get the attention weights from our target classification token to all previous tokens
-            target_attention = mean_attention[target_idx, :target_idx+1]
+            target_attention = max_attention[target_idx, :target_idx+1]
             
             # Filter tokens: we only want to keep meaningful clinical tokens, 
             # and ignore system prompt headers, punctuation, newlines, and template tags.
             filtered_indices = []
-            stop_words = {"<", ">", "start_of_turn", "model", "user", "end_of_turn", "turn", "\n", " ", ":", ".", "[", "]", "|", ",", "You", "are", "an", "AI-enabled"}
+            stop_words = {
+                "<", ">", "start_of_turn", "model", "user", "end_of_turn", "turn", "\n", " ", ":", ".", "[", "]", "|", ",", 
+                "You", "are", "an", "AI-enabled", "clinical", "safety", "sentinel", "Your", "task", "is", "to", "continuous", "monitor", 
+                "ICU", "patient", "trajectories", "and", "predict", "the", "imminent", "onset", "of", "Medication-Induced", "Kidney", 
+                "Injury", "demographics", "yo", "Sex", "Baseline", "Serum", "Creatinine", "Initiating", "sequence", "assessed", "currently",
+                "status", "risk", "indicates", "combined", "exposure", "cumulative", "received", "nephrotoxic", "antibiotics", "hemodynamic", 
+                "parameters", "active", "Meds", "Active", "as", "Synthesis"
+            }
             
             for i in range(target_idx + 1):
                 tok_str = tokens[i].strip()
-                if tok_str and not any(s in tok_str for s in stop_words):
+                # Case-insensitive boilerplate checks
+                if tok_str and not any(s.lower() in tok_str.lower() for s in stop_words):
                     filtered_indices.append(i)
             
             # Get the top 20 most attended tokens from our filtered list
@@ -120,7 +130,7 @@ def process_pipeline():
                 xticklabels=slice_tokens, 
                 yticklabels=[f"Focus of '{tokens[target_idx].strip()}'"],
                 cmap="Oranges", 
-                cbar_kws={'label': 'Attention Weight'}, 
+                cbar_kws={'label': 'Max Attention Weight'}, 
                 square=True, 
                 linewidths=0.5, 
                 linecolor='gray',

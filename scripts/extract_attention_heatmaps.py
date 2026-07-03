@@ -95,6 +95,15 @@ def process_pipeline():
             # Get the attention weights from our target classification token to all previous tokens
             target_attention = max_attention[target_idx, :target_idx+1]
             
+            # Zero out self-attention and bos token attention to prevent them from washing out clinical features
+            target_attention[target_idx] = 0.0
+            target_attention[0] = 0.0
+            
+            # Re-normalize so remaining weights sum to 1.0
+            sum_attn = target_attention.sum()
+            if sum_attn > 0:
+                target_attention = target_attention / sum_attn
+            
             # Filter tokens: we only want to keep meaningful clinical tokens, 
             # and ignore system prompt headers, punctuation, newlines, and template tags.
             filtered_indices = []

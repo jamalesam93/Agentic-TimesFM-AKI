@@ -99,17 +99,12 @@ def process_pipeline():
             target_attention[target_idx] = 0.0
             target_attention[0] = 0.0
             
-            # Re-normalize so remaining weights sum to 1.0
-            sum_attn = target_attention.sum()
-            if sum_attn > 0:
-                target_attention = target_attention / sum_attn
-            
             # Filter tokens: we only want to keep meaningful clinical tokens, 
             # and ignore system prompt headers, punctuation, newlines, and template tags.
             filtered_indices = []
             stop_words = {
-                "<", ">", "start_of_turn", "model", "user", "end_of_turn", "turn", "\n", " ", ":", ".", "[", "]", "|", ",", 
-                "You", "are", "an", "AI-enabled", "clinical", "safety", "sentinel", "Your", "task", "is", "to", "continuous", "monitor", 
+                "<", ">", "start_of_turn", "model", "user", "end_of_turn", "turn", "\n", " ", ":", ".", "[", "]", "|", ",", "-",
+                "You", "are", "an", "AI", "enabled", "AI-enabled", "system", "clinical", "safety", "sentinel", "Your", "task", "is", "to", "continuous", "monitor", 
                 "ICU", "patient", "trajectories", "and", "predict", "the", "imminent", "onset", "of", "Medication-Induced", "Kidney", 
                 "Injury", "demographics", "yo", "Sex", "Baseline", "Serum", "Creatinine", "Initiating", "sequence", "assessed", "currently",
                 "status", "risk", "indicates", "combined", "exposure", "cumulative", "received", "nephrotoxic", "antibiotics", "hemodynamic", 
@@ -129,7 +124,13 @@ def process_pipeline():
             # Sort the selected indices chronologically so they read left-to-right in order of the prompt
             top_n_indices.sort()
             
-            attention_slice = target_attention[top_n_indices].reshape(1, -1)
+            attention_slice = target_attention[top_n_indices]
+            # Re-normalize over just the selected clinical tokens
+            sum_slice = attention_slice.sum()
+            if sum_slice > 0:
+                attention_slice = attention_slice / sum_slice
+            attention_slice = attention_slice.reshape(1, -1)
+            
             slice_tokens = [tokens[i].strip() for i in top_n_indices]
 
             # 4. Generate Heatmap

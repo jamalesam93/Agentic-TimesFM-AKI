@@ -50,11 +50,18 @@ def process_pipeline():
     with open(input_file, 'r', encoding='utf-8') as f:
         for idx, line in enumerate(f):
             data = json.loads(line)
-            prompt = data.get("prompt", "")
-            if not prompt:
+            messages = data.get("messages", [])
+            if not messages or len(messages) < 2:
                 continue
                 
             print(f"Processing Patient {idx+1}...")
+            
+            # Format using tokenizer chat template (system + user messages)
+            inference_messages = [
+                {"role": messages[0]["role"], "content": messages[0]["content"]},
+                {"role": messages[1]["role"], "content": messages[1]["content"]},
+            ]
+            prompt = tokenizer.apply_chat_template(inference_messages, tokenize=False, add_generation_prompt=True)
             
             # Tokenize input
             inputs = tokenizer(prompt, return_tensors="pt").to(device)

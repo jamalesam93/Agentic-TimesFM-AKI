@@ -2,8 +2,8 @@ import json
 import re
 
 def create_ablation_dataset():
-    input_file = "data/eval_holdout.jsonl"
-    output_file = "data/ablation_eval_holdout_3day.jsonl"
+    input_file = "data/real_world/paper_eval_holdout.jsonl"
+    output_file = "data/real_world/ablation_eval_holdout_3day.jsonl"
     
     with open(input_file, "r") as f_in, open(output_file, "w") as f_out:
         for line in f_in:

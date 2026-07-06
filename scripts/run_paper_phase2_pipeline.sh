@@ -20,10 +20,10 @@ TRAIN_FILE="$PROJECT_DIR/data/paper_sft_dataset.jsonl"
 EVAL_FILE="$PROJECT_DIR/data/paper_eval_holdout.jsonl"
 
 # Output destinations
-OUTPUT_DIR="$PROJECT_DIR/outputs/paper-gemma-12b"
-MERGED_DIR="$PROJECT_DIR/exports/paper-gemma-12b-merged-bf16"
-GGUF_F16="$PROJECT_DIR/exports/paper-gemma-12b-f16.gguf"
-GGUF_Q6_K="$PROJECT_DIR/exports/paper-gemma-12b-q6_k.gguf"
+OUTPUT_DIR="$PROJECT_DIR/outputs/Agentic-TimesFM-AKI-12b"
+MERGED_DIR="$PROJECT_DIR/exports/Agentic-TimesFM-AKI-12b-merged-bf16"
+GGUF_F16="$PROJECT_DIR/exports/Agentic-TimesFM-AKI-12b-f16.gguf"
+GGUF_Q6_K="$PROJECT_DIR/exports/Agentic-TimesFM-AKI-12b-q6_k.gguf"
 EVAL_OUT="$PROJECT_DIR/reports/paper_eval_predictions.jsonl"
 METRICS_FILE="$PROJECT_DIR/reports/paper_eval_predictions.metrics.json"
 
@@ -200,7 +200,7 @@ if [ "${SKIP_GGUF:-0}" -ne 1 ]; then
     echo "  -> Running batch evaluator against llama-server..."
     "$PYTHON_BIN" "$SCRIPT_DIR/eval_dikd_batch.py" \
         --base-url "http://127.0.0.1:$PORT" \
-        --model "paper-gemma-12b" \
+        --model "Agentic-TimesFM-AKI-12b" \
         --data "$EVAL_FILE" \
         --out "$EVAL_OUT"
 

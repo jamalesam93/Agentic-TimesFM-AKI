@@ -150,12 +150,12 @@ LLAMA_CPP_PATH=~/llama.cpp bash scripts/real_world/run_paper_phase2_pipeline_rea
 ```
 
 ### What happens when you run this script?
-1. **Stage 1**: Automatically runs `generate_llm_dataset_real.py` to securely synthesize the real-world HDHI parameters into the `paper_sft_dataset.jsonl` if it doesn't already exist.
-2. **Stage 2-4**: Performs data contamination checks, schema validation, and summarizes label distribution.
-3. **Stage 5**: Initiates QLoRA fine-tuning. It trains the LLM on the real-world cohort and saves the adapter to `outputs/real_world/Agentic-TimesFM-AKI-12b/lora_adapter`.
+1. **Stage 1**: Automatically runs `generate_llm_dataset_real.py` to securely synthesize the real-world multi-center parameters into `paper_sft_dataset.jsonl` (with the eICU-like sparsity simulation).
+2. **Stage 2-4**: Performs data contamination checks, schema validation, and generates a structural audit (`paper_audit_summary.json`).
+3. **Stage 5**: Initiates QLoRA fine-tuning. It trains the LLM and saves the adapter to `outputs/real_world/Agentic-TimesFM-AKI-12b/lora_adapter`.
 4. **Stage 6**: Loads the base Gemma 12B model in full bf16 precision, merges the adapter, and saves the standalone merged model to `exports/real_world/Agentic-TimesFM-AKI-12b-merged-bf16`.
 5. **Stage 7**: Converts the merged weights to GGUF format and quantizes them to Q6_K layout (`exports/real_world/Agentic-TimesFM-AKI-12b-q6_k.gguf`).
-6. **Stage 8**: Spins up the `llama-server` in the background on port `1235`, runs `eval_dikd_batch.py` to evaluate the real-world validation set, and prints the clinical tier gates output.
+6. **Stage 8**: Spins up `llama-server` in the background on port `1235`, runs `eval_dikd_batch.py` to evaluate the real-world holdout (`paper_eval_holdout.jsonl`), and prints the clinical tier gates output.
 
 ---
 

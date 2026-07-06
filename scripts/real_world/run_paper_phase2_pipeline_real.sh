@@ -206,7 +206,7 @@ if [ "${SKIP_GGUF:-0}" -ne 1 ]; then
         --out "$EVAL_OUT"
 
     echo "  -> Running clinical quality tier gates..."
-    "$PYTHON_BIN" "$SCRIPT_DIR/../tier_gates.py" "$METRICS_FILE" --json "$PROJECT_DIR/reports/real_world/phd_gate_results.json"
+    "$PYTHON_BIN" "$SCRIPT_DIR/../tier_gates.py" "$METRICS_FILE" --json "$PROJECT_DIR/reports/real_world/paper_gate_results.json"
 
     echo -e "\n[SUCCESS] Pipeline successfully completed!"
 else

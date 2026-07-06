@@ -17,8 +17,14 @@ from peft import PeftModel
 def process_pipeline():
     # 1. Configuration
     base_model_name = "google/gemma-4-12b-it"
-    adapter_name = "QinEmPeRoR93/Agentic-TimesFM-AKI-4-12b-aki-lora"
-    input_file = "data/eval_holdout.jsonl"
+    
+    # Check for either the new or old adapter path locally
+    if os.path.exists("outputs/real_world/Agentic-TimesFM-AKI-12b/lora_adapter"):
+        adapter_name = "outputs/real_world/Agentic-TimesFM-AKI-12b/lora_adapter"
+    else:
+        adapter_name = "outputs/real_world/paper-gemma-12b/lora_adapter"
+        
+    input_file = "data/real_world/paper_eval_holdout.jsonl"
     out_dir = "plots/attention_heatmaps"
     os.makedirs(out_dir, exist_ok=True)
     

@@ -83,7 +83,7 @@ def compute_timesfm_patch_loss(peft_model, context, target, covs=None):
     return loss
 
 def main():
-    data_path = "data/real_world/phd_proposal_timesfm_dataset.jsonl"
+    data_path = "data/real_world/paper_timesfm_dataset.jsonl"
     
     if not os.path.exists(data_path):
         print(f"Dataset not found at {data_path}")

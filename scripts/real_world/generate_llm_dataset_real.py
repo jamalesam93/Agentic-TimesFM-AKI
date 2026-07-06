@@ -35,14 +35,14 @@ def generate_dataset(n_patients=2000, seed=42):
     
     # Rename default names to the PhD expected names
     old_llm = os.path.join(data_dir, "llm_fine_tuning_dataset.jsonl")
-    new_llm = os.path.join(data_dir, "phd_proposal_sft_dataset.jsonl")
+    new_llm = os.path.join(data_dir, "paper_sft_dataset.jsonl")
     if os.path.exists(old_llm):
         if os.path.exists(new_llm):
             os.remove(new_llm)
         os.rename(old_llm, new_llm)
         
     old_timesfm = os.path.join(data_dir, "timesfm_training_cohort.jsonl")
-    new_timesfm = os.path.join(data_dir, "phd_proposal_timesfm_dataset.jsonl")
+    new_timesfm = os.path.join(data_dir, "paper_timesfm_dataset.jsonl")
     if os.path.exists(old_timesfm):
         if os.path.exists(new_timesfm):
             os.remove(new_timesfm)

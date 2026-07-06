@@ -17,7 +17,7 @@ from peft import PeftModel
 def process_pipeline():
     # 1. Configuration
     base_model_name = "google/gemma-4-12b-it"
-    adapter_name = "QinEmPeRoR93/phd-gemma-4-12b-aki-lora"
+    adapter_name = "QinEmPeRoR93/paper-gemma-4-12b-aki-lora"
     input_file = "data/eval_holdout.jsonl"
     out_dir = "plots/attention_heatmaps"
     os.makedirs(out_dir, exist_ok=True)

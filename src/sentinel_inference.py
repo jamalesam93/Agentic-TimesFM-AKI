@@ -43,7 +43,7 @@ def get_timesfm_model():
 
 def main():
     parser = argparse.ArgumentParser(description="Zero-Shot TimesFM Inference for AKI Sentinel")
-    parser.add_argument("--data-path", type=str, default="data/real_world/phd_proposal_timesfm_dataset.jsonl", help="Path to TimesFM JSONL dataset")
+    parser.add_argument("--data-path", type=str, default="data/real_world/paper_timesfm_dataset.jsonl", help="Path to TimesFM JSONL dataset")
     parser.add_argument("--limit", type=int, default=100, help="Number of patients to evaluate")
     args = parser.parse_args()
 

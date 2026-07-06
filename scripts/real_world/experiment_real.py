@@ -18,8 +18,8 @@ from src import generator
 def main():
     root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     data_dir = os.path.join(root_dir, "data", "real_world")
-    csv_clean_path = os.path.join(data_dir, "phd_proposal_real_cohort.csv")
-    csv_messy_path = os.path.join(data_dir, "phd_proposal_real_cohort_messy.csv")
+    csv_clean_path = os.path.join(data_dir, "paper_real_cohort.csv")
+    csv_messy_path = os.path.join(data_dir, "paper_real_cohort_messy.csv")
     
     if os.path.exists(csv_clean_path) and os.path.exists(csv_messy_path):
         print("-> Loading pre-synthesized audited cohort datasets from disk...")
@@ -208,7 +208,7 @@ def main():
     plt.ylabel('True Positive Rate')
     plt.title('Predicting Acute Kidney Injury (AKI) - Robustness Test')
     plt.legend(loc="lower right")
-    roc_path = os.path.join(plots_dir, "phd_proposal_roc.png")
+    roc_path = os.path.join(plots_dir, "paper_roc.png")
     plt.savefig(roc_path, dpi=300, bbox_inches='tight')
     plt.close()
     
@@ -229,14 +229,14 @@ def main():
         if name in ['received_vanco', 'received_zosyn']:
             bars[i].set_color('salmon')
 
-    fi_path = os.path.join(plots_dir, "phd_proposal_feature_importance.png")
+    fi_path = os.path.join(plots_dir, "paper_feature_importance.png")
     plt.savefig(fi_path, dpi=300, bbox_inches='tight')
     plt.close()
     
     print(f"-> Saved plots to {plots_dir}")
     
     # 5. Save the Dataset
-    csv_clean_path = os.path.join(data_dir, "phd_proposal_real_cohort.csv")
+    csv_clean_path = os.path.join(data_dir, "paper_real_cohort.csv")
     df.to_csv(csv_clean_path, index=False)
     print(f"-> Saved clean synthetic dataset to {csv_clean_path}")
 

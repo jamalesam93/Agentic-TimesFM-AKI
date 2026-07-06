@@ -1,6 +1,6 @@
 # Vast.ai Deployment & Execution Guide: Real-World Grounded Phase 2 LLM Pipeline
 
-This guide outlines the exact, step-by-step procedure for deploying, configuring, and executing the **Real-World Grounded Phase 2 LLM Fine-Tuning and Evaluation Pipeline** (`scripts/real_world/run_phd_phase2_pipeline_real.sh`) on a **Vast.ai** GPU instance.
+This guide outlines the exact, step-by-step procedure for deploying, configuring, and executing the **Real-World Grounded Phase 2 LLM Fine-Tuning and Evaluation Pipeline** (`scripts/real_world/run_paper_phase2_pipeline_real.sh`) on a **Vast.ai** GPU instance.
 
 ---
 
@@ -143,18 +143,18 @@ source .venv/bin/activate
 python src/finetune_timesfm.py
 
 # 2. Make the LLM pipeline executable
-chmod +x scripts/real_world/run_phd_phase2_pipeline_real.sh
+chmod +x scripts/real_world/run_paper_phase2_pipeline_real.sh
 
 # 3. Run the LLM complete pipeline (Phase 2)
-LLAMA_CPP_PATH=~/llama.cpp bash scripts/real_world/run_phd_phase2_pipeline_real.sh
+LLAMA_CPP_PATH=~/llama.cpp bash scripts/real_world/run_paper_phase2_pipeline_real.sh
 ```
 
 ### What happens when you run this script?
-1. **Stage 1**: Automatically runs `generate_llm_dataset_real.py` to securely synthesize the real-world HDHI parameters into the `phd_proposal_sft_dataset.jsonl` if it doesn't already exist.
+1. **Stage 1**: Automatically runs `generate_llm_dataset_real.py` to securely synthesize the real-world HDHI parameters into the `paper_sft_dataset.jsonl` if it doesn't already exist.
 2. **Stage 2-4**: Performs data contamination checks, schema validation, and summarizes label distribution.
-3. **Stage 5**: Initiates QLoRA fine-tuning. It trains the LLM on the real-world cohort and saves the adapter to `outputs/real_world/phd-gemma-12b/lora_adapter`.
-4. **Stage 6**: Loads the base Gemma 12B model in full bf16 precision, merges the adapter, and saves the standalone merged model to `exports/real_world/phd-gemma-12b-merged-bf16`.
-5. **Stage 7**: Converts the merged weights to GGUF format and quantizes them to Q6_K layout (`exports/real_world/phd-gemma-12b-q6_k.gguf`).
+3. **Stage 5**: Initiates QLoRA fine-tuning. It trains the LLM on the real-world cohort and saves the adapter to `outputs/real_world/paper-gemma-12b/lora_adapter`.
+4. **Stage 6**: Loads the base Gemma 12B model in full bf16 precision, merges the adapter, and saves the standalone merged model to `exports/real_world/paper-gemma-12b-merged-bf16`.
+5. **Stage 7**: Converts the merged weights to GGUF format and quantizes them to Q6_K layout (`exports/real_world/paper-gemma-12b-q6_k.gguf`).
 6. **Stage 8**: Spins up the `llama-server` in the background on port `1235`, runs `eval_dikd_batch.py` to evaluate the real-world validation set, and prints the clinical tier gates output.
 
 ---
@@ -167,7 +167,7 @@ Open a **new terminal window on your local machine** and run:
 
 ### 1. Download the Quantized Model (`.gguf`)
 ```bash
-scp -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/exports/real_world/phd-gemma-12b-q6_k.gguf ./
+scp -P <PORT> root@<IP_ADDRESS>:/root/AKI-training/exports/real_world/paper-gemma-12b-q6_k.gguf ./
 ```
 
 ### 2. Download the Reports and Metrics

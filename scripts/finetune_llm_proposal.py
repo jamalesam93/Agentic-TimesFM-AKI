@@ -28,7 +28,7 @@ def main():
     
     # Configuration
     model_id = "google/gemma-12b"  # Base model as used in prior experiments
-    data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "phd_proposal_sft_dataset.jsonl")
+    data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "paper_sft_dataset.jsonl")
     output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "clinical_sentinel_gemma")
     
     if not os.path.exists(data_path):

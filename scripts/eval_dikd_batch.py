@@ -54,6 +54,7 @@ def chat_completion(
         "model": model,
         "messages": messages,
         "temperature": temperature,
+        "max_tokens": 1024,
         "logprobs": True,
         "top_logprobs": 5,
     }
@@ -121,10 +122,13 @@ def main() -> int:
         # Ground truth from the assistant message
         gt_label = extract_label(messages[2]["content"])
 
+        user_content = messages[1]["content"]
+        user_content += "\n\nCRITICAL INSTRUCTION: You must provide a clinical synthesis and end your response EXACTLY with the tag [NORMAL] or [AKI_STAGE_1+]. Do not omit the brackets."
+        
         # Send only system + user messages (no assistant — model must predict)
         inference_messages = [
             {"role": messages[0]["role"], "content": messages[0]["content"]},
-            {"role": messages[1]["role"], "content": messages[1]["content"]},
+            {"role": "user", "content": user_content},
         ]
 
         raw_response = ""
@@ -198,7 +202,7 @@ def main() -> int:
     print(f"  Total        : {total}")
     print(f"  Correct      : {correct} ({accuracy:.1%})")
     print(f"  Parse rate   : {parse_ok}/{total} ({parse_rate:.1%})")
-    print(f"  ─────────────────────────────────")
+    print(f"  ---------------------------------")
     print(f"  Sensitivity  : {sensitivity:.1%}  (TP={tp}, FN={fn})")
     print(f"  Specificity  : {specificity:.1%}  (TN={tn}, FP={fp})")
     print(f"  Precision    : {precision:.1%}")

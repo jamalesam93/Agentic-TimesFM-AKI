@@ -1,0 +1,43 @@
+{
+  "source_file": "E:\\Antigravity Projects\\AKI-training\\reports\\real_world\\phd_eval_predictions.jsonl",
+  "n_predictions": 200,
+  "n_bootstrap": 10000,
+  "confidence_level": 0.95,
+  "metrics": {
+    "accuracy": {
+      "point_estimate": 0.995,
+      "ci_lower": 0.985,
+      "ci_upper": 1.0,
+      "ci_width": 0.015,
+      "std": 0.005
+    },
+    "sensitivity": {
+      "point_estimate": 0.9898,
+      "ci_lower": 0.9652,
+      "ci_upper": 1.0,
+      "ci_width": 0.0348,
+      "std": 0.0102
+    },
+    "specificity": {
+      "point_estimate": 1.0,
+      "ci_lower": 1.0,
+      "ci_upper": 1.0,
+      "ci_width": 0.0,
+      "std": 0.0
+    },
+    "precision": {
+      "point_estimate": 1.0,
+      "ci_lower": 1.0,
+      "ci_upper": 1.0,
+      "ci_width": 0.0,
+      "std": 0.0
+    },
+    "f1": {
+      "point_estimate": 0.9949,
+      "ci_lower": 0.9823,
+      "ci_upper": 1.0,
+      "ci_width": 0.0177,
+      "std": 0.0052
+    }
+  }
+}

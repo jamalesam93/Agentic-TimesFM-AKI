@@ -212,8 +212,13 @@ def generate_temporal_record(
     charting_error_vanco = rng.rand() < 0.05
     charting_error_zosyn = rng.rand() < 0.05
     
+    # Multi-center Sparsity Simulation (e.g. eICU-like community hospitals)
+    # 50% of patients are assigned to "community hospital" protocols where labs are sparse
+    is_community_hospital = rng.rand() < 0.50
+    
     # Track if KDIGO AKI criteria was ever met during the trajectory
     had_aki = False
+    last_charted_scr = patient['baseline_scr']
     scr_history = [patient['baseline_scr']]
 
     for day in range(1, days + 1):
@@ -261,17 +266,29 @@ def generate_temporal_record(
             # Normal physiological drift
             current_scr += round(rng.normal(0.0, 0.03), 2)
 
+        # Apply multi-center charting sparsity
+        if is_community_hospital and day > 1:
+            # 60% chance they don't draw a lab today, so we carry forward the previous day's chart value
+            if rng.rand() < 0.60:
+                charted_scr = last_charted_scr
+            else:
+                charted_scr = current_scr
+                last_charted_scr = charted_scr
+        else:
+            charted_scr = current_scr
+            last_charted_scr = charted_scr
+
         # Calculate KDIGO Stage and rolling baseline minimums
         past_48h = scr_history[-2:] if len(scr_history) >= 2 else []
-        creat_low_past_48hr = min(past_48h) if past_48h else current_scr
+        creat_low_past_48hr = min(past_48h) if past_48h else charted_scr
         creat_low_past_7day = min(scr_history)
 
         stage = 0
-        stage1_cond1 = current_scr >= creat_low_past_7day * 1.5
-        stage1_cond2 = (len(past_48h) > 0 and current_scr >= creat_low_past_48hr + 0.3)
-        stage2_cond = current_scr >= creat_low_past_7day * 2.0
-        stage3_cond1 = current_scr >= creat_low_past_7day * 3.0
-        stage3_cond2 = (current_scr >= 4.0 and (current_scr >= creat_low_past_7day * 1.5 or current_scr >= creat_low_past_48hr + 0.3))
+        stage1_cond1 = charted_scr >= creat_low_past_7day * 1.5
+        stage1_cond2 = (len(past_48h) > 0 and charted_scr >= creat_low_past_48hr + 0.3)
+        stage2_cond = charted_scr >= creat_low_past_7day * 2.0
+        stage3_cond1 = charted_scr >= creat_low_past_7day * 3.0
+        stage3_cond2 = (charted_scr >= 4.0 and (charted_scr >= creat_low_past_7day * 1.5 or charted_scr >= creat_low_past_48hr + 0.3))
 
         if stage1_cond1 or stage1_cond2:
             stage = 1
@@ -280,7 +297,7 @@ def generate_temporal_record(
         if stage3_cond1 or stage3_cond2:
             stage = 3
 
-        scr_history.append(current_scr)
+        scr_history.append(charted_scr)
 
         # KDIGO criteria: AKI Stage 1+ is defined as SCr >= 1.5x baseline or any stage >= 1
         if stage >= 1:
@@ -296,7 +313,7 @@ def generate_temporal_record(
             'vanco_active': bool(flowsheet_vanco),
             'zosyn_active': bool(flowsheet_zosyn),
             'vanco_trough': round(vanco_trough, 1) if vanco_trough > 0.0 else 0.0,
-            'scr': round(current_scr, 2),
+            'scr': round(charted_scr, 2),
             'risk_state': risk_label,
             'kdigo_stage': stage,
             'creat_low_past_48hr': round(creat_low_past_48hr, 2),

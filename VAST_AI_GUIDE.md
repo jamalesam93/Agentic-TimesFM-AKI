@@ -134,19 +134,17 @@ Verify that the binaries `llama-quantize` and `llama-server` exist in `~/llama.c
 
 ## 🏃 Step 5: Run the End-to-End Pipeline
 
-Return to the repository directory, activate the venv, and run the orchestrator script:
+### 5. Execute the Training Pipeline
+Run the main pipeline script. This will handle the dataset parsing, QLoRA training, adapter merging, GGUF conversion, and start the Llama.cpp batch evaluation:
 ```bash
+# Make sure you are in the AKI-training root directory
 cd ~/AKI-training
-source .venv/bin/activate
 
-# 1. Run the TimesFM Fine-Tuning (Phase 1)
-python src/finetune_timesfm.py
-
-# 2. Make the LLM pipeline executable
+# Make the script executable
 chmod +x scripts/real_world/run_paper_phase2_pipeline_real.sh
 
-# 3. Run the LLM complete pipeline (Phase 2)
-LLAMA_CPP_PATH=~/llama.cpp bash scripts/real_world/run_paper_phase2_pipeline_real.sh
+# Run the pipeline
+./scripts/real_world/run_paper_phase2_pipeline_real.sh
 ```
 
 ### What happens when you run this script?

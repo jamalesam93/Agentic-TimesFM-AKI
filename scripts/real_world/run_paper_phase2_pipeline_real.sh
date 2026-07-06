@@ -198,15 +198,29 @@ if [ "${SKIP_GGUF:-0}" -ne 1 ]; then
         sleep 2
     done
 
-    echo "  -> Running batch evaluator against llama-server..."
+    echo "  -> Running batch evaluator against llama-server (eICU)..."
     "$PYTHON_BIN" "$SCRIPT_DIR/../eval_dikd_batch.py" \
         --base-url "http://127.0.0.1:$PORT" \
         --model "Agentic-TimesFM-AKI-12b" \
         --data "$EVAL_FILE" \
         --out "$EVAL_OUT"
 
-    echo "  -> Running clinical quality tier gates..."
+    echo "  -> Running batch evaluator against llama-server (MIMIC-IV)..."
+    MIMIC_EVAL_FILE="$PROJECT_DIR/data/mimic_eval_holdout.jsonl"
+    MIMIC_EVAL_OUT="$PROJECT_DIR/reports/real_world/mimic_eval_predictions.jsonl"
+    MIMIC_METRICS_FILE="$PROJECT_DIR/reports/real_world/mimic_eval_predictions.metrics.json"
+
+    "$PYTHON_BIN" "$SCRIPT_DIR/../eval_dikd_batch.py" \
+        --base-url "http://127.0.0.1:$PORT" \
+        --model "Agentic-TimesFM-AKI-12b" \
+        --data "$MIMIC_EVAL_FILE" \
+        --out "$MIMIC_EVAL_OUT"
+
+    echo "  -> Running clinical quality tier gates (eICU)..."
     "$PYTHON_BIN" "$SCRIPT_DIR/../tier_gates.py" "$METRICS_FILE" --json "$PROJECT_DIR/reports/real_world/paper_gate_results.json"
+
+    echo "  -> Running clinical quality tier gates (MIMIC-IV)..."
+    "$PYTHON_BIN" "$SCRIPT_DIR/../tier_gates.py" "$MIMIC_METRICS_FILE" --json "$PROJECT_DIR/reports/real_world/mimic_gate_results.json"
 
     echo -e "\n[SUCCESS] Pipeline successfully completed!"
 else

@@ -87,6 +87,16 @@ def process_pipeline():
     # Pre-load predictions to identify parse failures (truncations)
     parse_fails = set()
     pred_file = args.predictions_file
+    if not os.path.exists(pred_file):
+        for fallback in [
+            "reports/paper_eval_predictions.jsonl",
+            "reports/eval_predictions.jsonl",
+            "reports/real_world/paper_eval_predictions.jsonl"
+        ]:
+            if os.path.exists(fallback):
+                pred_file = fallback
+                break
+
     if os.path.exists(pred_file):
         print(f"Loading predictions from {pred_file} to detect parse fails...")
         with open(pred_file, 'r', encoding='utf-8') as pf:

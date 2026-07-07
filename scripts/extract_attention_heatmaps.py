@@ -45,10 +45,10 @@ def process_pipeline():
     # Determine input file path
     if args.input_file:
         input_file = args.input_file
-    elif os.path.exists("data/eicu_eval_holdout.jsonl"):
-        input_file = "data/eicu_eval_holdout.jsonl"
     elif os.path.exists("data/real_world/paper_eval_holdout.jsonl"):
         input_file = "data/real_world/paper_eval_holdout.jsonl"
+    elif os.path.exists("data/eicu_eval_holdout.jsonl"):
+        input_file = "data/eicu_eval_holdout.jsonl"
     else:
         input_file = "data/eicu_eval_holdout.jsonl" # Default fallback
         

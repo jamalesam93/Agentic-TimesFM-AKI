@@ -54,6 +54,17 @@ def process_pipeline():
         
     print(f"Looping through {input_file} to generate batch heatmaps...")
     
+    # Pre-load predictions to identify parse failures (truncations)
+    parse_fails = set()
+    pred_file = "reports/real_world/paper_eval_predictions.jsonl"
+    if os.path.exists(pred_file):
+        with open(pred_file, 'r', encoding='utf-8') as pf:
+            for pf_idx, pf_line in enumerate(pf):
+                pf_data = json.loads(pf_line)
+                raw_response = pf_data.get("raw_response", "")
+                if "[" in raw_response and "]" not in raw_response:
+                    parse_fails.add(pf_idx)
+
     with open(input_file, 'r', encoding='utf-8') as f:
         for idx, line in enumerate(f):
             data = json.loads(line)
@@ -62,6 +73,7 @@ def process_pipeline():
                 continue
                 
             print(f"Processing Patient {idx+1}...")
+            is_parse_fail = idx in parse_fails
             
             # Format using tokenizer chat template (including the assistant's final answer)
             prompt = tokenizer.apply_chat_template(messages, tokenize=False)
@@ -153,7 +165,14 @@ def process_pipeline():
                 fmt=".2f"
             )
             
-            plt.title(f"Patient {idx+1} Causal Attention Mapping (Label: {tokens[target_idx].strip()})", fontsize=12, pad=15)
+            title_str = f"Patient {idx+1} Causal Attention Mapping (Label: {tokens[target_idx].strip()})"
+            if is_parse_fail:
+                title_str += "\n[FALSE NEGATIVE: TOKEN TRUNCATED - PARSE FAIL]"
+                title_color = "red"
+            else:
+                title_color = "black"
+                
+            plt.title(title_str, fontsize=12, pad=15, color=title_color, fontweight="bold" if is_parse_fail else "normal")
             plt.xticks(rotation=45, ha='right', fontsize=9)
             plt.yticks(rotation=0, fontsize=10, fontweight='bold')
             

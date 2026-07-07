@@ -17,12 +17,17 @@ from peft import PeftModel
 def process_pipeline():
     # 1. Configuration
     base_model_name = "google/gemma-4-12b-it"
+    subfolder = None
     
-    # Check for either the new or old adapter path locally
+    # Check for either the new or old adapter path locally, otherwise fallback to Hugging Face Hub
     if os.path.exists("outputs/real_world/Agentic-TimesFM-AKI-12b/lora_adapter"):
         adapter_name = "outputs/real_world/Agentic-TimesFM-AKI-12b/lora_adapter"
-    else:
+    elif os.path.exists("outputs/real_world/paper-gemma-12b/lora_adapter"):
         adapter_name = "outputs/real_world/paper-gemma-12b/lora_adapter"
+    else:
+        adapter_name = "QinEmPeRoR93/Agentic-TimesFM-AKI-12B"
+        subfolder = "llm_lora_adapter"
+        print(f"Local adapter not found. Falling back to Hugging Face Hub: {adapter_name} (subfolder: {subfolder})")
         
     input_file = "data/real_world/paper_eval_holdout.jsonl"
     out_dir = "plots/attention_heatmaps"
@@ -45,7 +50,10 @@ def process_pipeline():
     )
     
     print(f"Fusing PEFT adapter: {adapter_name}...")
-    model = PeftModel.from_pretrained(base_model, adapter_name)
+    if subfolder:
+        model = PeftModel.from_pretrained(base_model, adapter_name, subfolder=subfolder)
+    else:
+        model = PeftModel.from_pretrained(base_model, adapter_name)
     model.eval()
 
     # 3. Read Evaluation Data
@@ -54,17 +62,6 @@ def process_pipeline():
         
     print(f"Looping through {input_file} to generate batch heatmaps...")
     
-    # Pre-load predictions to identify parse failures (truncations)
-    parse_fails = set()
-    pred_file = "reports/real_world/paper_eval_predictions.jsonl"
-    if os.path.exists(pred_file):
-        with open(pred_file, 'r', encoding='utf-8') as pf:
-            for pf_idx, pf_line in enumerate(pf):
-                pf_data = json.loads(pf_line)
-                raw_response = pf_data.get("raw_response", "")
-                if "[" in raw_response and "]" not in raw_response:
-                    parse_fails.add(pf_idx)
-
     with open(input_file, 'r', encoding='utf-8') as f:
         for idx, line in enumerate(f):
             data = json.loads(line)
@@ -73,7 +70,6 @@ def process_pipeline():
                 continue
                 
             print(f"Processing Patient {idx+1}...")
-            is_parse_fail = idx in parse_fails
             
             # Format using tokenizer chat template (including the assistant's final answer)
             prompt = tokenizer.apply_chat_template(messages, tokenize=False)
@@ -165,14 +161,7 @@ def process_pipeline():
                 fmt=".2f"
             )
             
-            title_str = f"Patient {idx+1} Causal Attention Mapping (Label: {tokens[target_idx].strip()})"
-            if is_parse_fail:
-                title_str += "\n[FALSE NEGATIVE: TOKEN TRUNCATED - PARSE FAIL]"
-                title_color = "red"
-            else:
-                title_color = "black"
-                
-            plt.title(title_str, fontsize=12, pad=15, color=title_color, fontweight="bold" if is_parse_fail else "normal")
+            plt.title(f"Patient {idx+1} Causal Attention Mapping (Label: {tokens[target_idx].strip()})", fontsize=12, pad=15)
             plt.xticks(rotation=45, ha='right', fontsize=9)
             plt.yticks(rotation=0, fontsize=10, fontweight='bold')
             

@@ -47,3 +47,6 @@ data/real_world/eicu-collaborative-research-database-demo-2.0.1/
 data/datasets_not_organized/
 reports/graphs/patient_*_attention_heatmap.png
 
+
+plots/
+Article/

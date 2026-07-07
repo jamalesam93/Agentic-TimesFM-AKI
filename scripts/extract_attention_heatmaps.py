@@ -102,8 +102,7 @@ def process_pipeline():
         with open(pred_file, 'r', encoding='utf-8') as pf:
             for pf_idx, pf_line in enumerate(pf):
                 pf_data = json.loads(pf_line)
-                raw_response = pf_data.get("raw_response", "")
-                if "[" in raw_response and "]" not in raw_response:
+                if pf_data.get("predicted") == "PARSE_FAIL":
                     parse_fails.add(pf_idx)
     else:
         print(f"Predictions file not found at {pred_file}. Truncation labels will not be applied.")

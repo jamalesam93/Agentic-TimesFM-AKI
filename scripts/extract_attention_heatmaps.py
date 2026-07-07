@@ -112,7 +112,13 @@ def process_pipeline():
             prompt = tokenizer.apply_chat_template(messages, tokenize=False)
             
             # Tokenize input
-            inputs = tokenizer(prompt, return_tensors="pt").to(device)
+            try:
+                input_device = model.get_input_embeddings().weight.device
+            except AttributeError:
+                input_device = next(model.parameters()).device
+                
+            inputs = tokenizer(prompt, return_tensors="pt")
+            inputs = {k: v.to(input_device) for k, v in inputs.items()}
             input_ids = inputs["input_ids"][0]
             tokens = [tokenizer.decode([tid]) for tid in input_ids]
             

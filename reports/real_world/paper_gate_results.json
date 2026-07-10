@@ -1,0 +1,36 @@
+{
+  "all_gates_passed": false,
+  "ship_decision": "NO-GO",
+  "gates": {
+    "sensitivity": {
+      "value": 0.9438,
+      "threshold": 0.95,
+      "passed": false,
+      "label": "AKI Sensitivity (Recall)"
+    },
+    "specificity": {
+      "value": 0.991,
+      "threshold": 0.85,
+      "passed": true,
+      "label": "Specificity (True Negative Rate)"
+    },
+    "f1": {
+      "value": 0.9655,
+      "threshold": 0.9,
+      "passed": true,
+      "label": "F1 Score"
+    },
+    "parse_rate": {
+      "value": 0.975,
+      "threshold": 0.98,
+      "passed": false,
+      "label": "Structured Output Parse Rate"
+    }
+  },
+  "confusion": {
+    "tp": 84,
+    "fp": 1,
+    "tn": 110,
+    "fn": 5
+  }
+}

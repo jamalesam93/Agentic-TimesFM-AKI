@@ -29,7 +29,7 @@ def load_predictions(filepath):
     y_true = []
     y_pred = []
     
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r', encoding="utf-8") as f:
         for line in f:
             record = json.loads(line)
             # The eval predictions contain 'label' (ground truth) and 'predicted' fields
@@ -177,7 +177,7 @@ def main():
         'metrics': results,
     }
     
-    with open(out_path, 'w') as f:
+    with open(out_path, 'w', encoding="utf-8") as f:
         json.dump(output, f, indent=2)
     
     print(f"\nSaved to: {out_path}")

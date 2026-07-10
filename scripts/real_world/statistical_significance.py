@@ -34,7 +34,7 @@ def load_predictions(filepath):
     y_true = []
     y_pred = []
     
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r', encoding="utf-8") as f:
         for line in f:
             record = json.loads(line)
             label = record.get('label') or record.get('ground_truth') or record.get('true_label')
@@ -202,7 +202,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "statistical_significance_tests.json"
     
-    with open(out_path, 'w') as f:
+    with open(out_path, 'w', encoding="utf-8") as f:
         json.dump({
             'test': "McNemar's test (chi-squared with continuity correction)",
             'reference_model': 'Gemma-4 + TimesFM Agentic Sentinel',

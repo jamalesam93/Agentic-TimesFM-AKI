@@ -28,7 +28,7 @@ plt.rcParams.update({
 def load_data(filepath):
     X = []
     y = []
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r', encoding="utf-8") as f:
         for line in f:
             d = json.loads(line)
             scr = d.get('scr')
@@ -81,10 +81,10 @@ def main():
         "XGBoost": xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
     }
     
-    # Also add the Gemma-4 12B theoretical point (from our report)
-    # Sensitivity: 0.990, Specificity: 1.000 -> FPR = 0.0, TPR = 0.99
-    gemma_fpr = 0.0
-    gemma_tpr = 0.99
+    # Also add the Gemma-4 12B actual point (from our real-world holdout evaluation)
+    # Sensitivity: 0.9438, Specificity: 0.991 -> FPR = 1.0 - 0.991 = 0.009, TPR = 0.9438
+    gemma_fpr = 0.009
+    gemma_tpr = 0.9438
     
     plt.figure(figsize=(8, 6))
     
@@ -116,14 +116,14 @@ def main():
 
     # Plot Gemma Point
     plt.plot([gemma_fpr], [gemma_tpr], marker='*', color='#1f77b4', markersize=15, 
-             linestyle='None', label='Gemma-4 + TimesFM Agent\n(Accuracy = 99.5%)')
+             linestyle='None', label='Gemma-4 + TimesFM Agent\n(Accuracy = 97.0%)')
 
     plt.plot([0, 1], [0, 1], color='black', lw=1.5, linestyle='--')
     plt.xlim([-0.02, 1.0])
     plt.ylim([0.0, 1.02])
     plt.xlabel('False Positive Rate', fontweight='bold')
     plt.ylabel('True Positive Rate', fontweight='bold')
-    plt.title('Figure 3: Receiver Operating Characteristic (ROC) Curve\nTraditional ML vs. Agentic LLM on Real-World Data', pad=20, fontweight='bold')
+    plt.title('Figure 4: Receiver Operating Characteristic (ROC) Curve\nTraditional ML vs. Agentic LLM on Real-World Data', pad=20, fontweight='bold')
     plt.legend(loc="lower right", frameon=True, framealpha=1, edgecolor='black')
     
     out_dir = "reports/graphs"

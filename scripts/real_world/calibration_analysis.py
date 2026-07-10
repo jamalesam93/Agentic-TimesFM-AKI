@@ -24,7 +24,7 @@ plt.rcParams.update({
 def load_data(filepath):
     X = []
     y = []
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r', encoding="utf-8") as f:
         for line in f:
             d = json.loads(line)
             scr = d.get('scr')
@@ -111,7 +111,7 @@ def main():
     
     # Write a small explanation regarding the LLM calibration
     readme_path = os.path.join(plots_dir, "calibration_readme.md")
-    with open(readme_path, "w") as f:
+    with open(readme_path, "w", encoding="utf-8") as f:
         f.write("# Calibration Analysis\n\n")
         f.write("The `calibration_curve.png` shows the reliability diagrams for the traditional ML baselines. ")
         f.write("A Brier score closer to 0 indicates better calibration.\n\n")

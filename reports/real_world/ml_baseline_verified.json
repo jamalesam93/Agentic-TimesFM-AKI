@@ -1,0 +1,95 @@
+{
+  "Random Forest": {
+    "point": {
+      "accuracy": 0.807,
+      "sensitivity": 0.709,
+      "specificity": 0.877,
+      "precision": 0.801,
+      "f1": 0.752
+    },
+    "ci": {
+      "accuracy": [
+        0.767,
+        0.845
+      ],
+      "sensitivity": [
+        0.637,
+        0.777
+      ],
+      "specificity": [
+        0.833,
+        0.917
+      ],
+      "precision": [
+        0.735,
+        0.864
+      ],
+      "f1": [
+        0.695,
+        0.804
+      ]
+    }
+  },
+  "XGBoost": {
+    "point": {
+      "accuracy": 0.795,
+      "sensitivity": 0.739,
+      "specificity": 0.834,
+      "precision": 0.758,
+      "f1": 0.748
+    },
+    "ci": {
+      "accuracy": [
+        0.755,
+        0.835
+      ],
+      "sensitivity": [
+        0.671,
+        0.805
+      ],
+      "specificity": [
+        0.785,
+        0.88
+      ],
+      "precision": [
+        0.692,
+        0.822
+      ],
+      "f1": [
+        0.694,
+        0.799
+      ]
+    }
+  },
+  "Logistic Regression": {
+    "point": {
+      "accuracy": 0.713,
+      "sensitivity": 0.812,
+      "specificity": 0.643,
+      "precision": 0.615,
+      "f1": 0.7
+    },
+    "ci": {
+      "accuracy": [
+        0.667,
+        0.755
+      ],
+      "sensitivity": [
+        0.751,
+        0.869
+      ],
+      "specificity": [
+        0.578,
+        0.702
+      ],
+      "precision": [
+        0.55,
+        0.678
+      ],
+      "f1": [
+        0.645,
+        0.749
+      ]
+    }
+  }
+}

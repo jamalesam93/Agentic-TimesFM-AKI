@@ -1,0 +1,10 @@
+{
+  "file": "/root/AKI-training/data/real_world/paper_sft_dataset.jsonl",
+  "total": 2000,
+  "counts": {
+    "NORMAL": 1140,
+    "AKI_STAGE_1+": 860
+  },
+  "aki_ratio": 0.43,
+  "balanced": true
+}

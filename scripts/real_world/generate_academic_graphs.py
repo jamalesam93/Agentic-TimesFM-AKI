@@ -46,9 +46,9 @@ def generate_loss_curve(output_dir):
     print("Generated academic timesfm_loss_curve.png")
 
 def generate_confusion_matrix(output_dir):
-    # TP=97, FP=0, FN=1, TN=102
+    # TP=84, FP=1, FN=5, TN=110
     # Format: [[TN, FP], [FN, TP]]
-    cm = np.array([[102, 0], [1, 97]])
+    cm = np.array([[110, 1], [5, 84]])
     
     fig, ax = plt.subplots(figsize=(7, 6))
     
@@ -60,7 +60,7 @@ def generate_confusion_matrix(output_dir):
                 cbar_kws={'label': 'Number of Trajectories'},
                 linewidths=1, linecolor='black', ax=ax)
     
-    ax.set_title('Figure 2: Gemma-4 12B Clinical Accuracy\nConfusion Matrix (n=200 Holdout)', pad=20, fontweight='bold')
+    ax.set_title('Figure 5: Gemma-4 12B Clinical Accuracy\nConfusion Matrix (n=200 Holdout)', pad=20, fontweight='bold')
     ax.set_xlabel('Predicted Clinical Diagnosis')
     ax.set_ylabel('Actual Ground-Truth Diagnosis')
     

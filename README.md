@@ -20,7 +20,7 @@
 The framework is trained exclusively on **differentially private synthetic EHR data** (ε = 10), ensuring zero exposure to Protected Health Information (PHI), and was rigorously validated on real-world holdout cohorts from the publicly accessible **eICU** and **MIMIC-IV** demo databases.
 
 > [!NOTE]
-> This repository accompanies the manuscript: *"Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data"* — Saka, J. E. (2026).
+> This repository accompanies the manuscript: *"Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data"* — Alsakkaf, G. E. (2026).
 
 ---
 
@@ -270,7 +270,7 @@ If you use this framework, code, or model weights in your research, please cite:
 @article{saka2026agentictimesfmaki,
   title   = {Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting 
              Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data},
-  author  = {Saka, Jamal E.},
+  author  = {Alsakkaf, Gamal E.},
   year    = {2026},
   note    = {Manuscript under review}
 }

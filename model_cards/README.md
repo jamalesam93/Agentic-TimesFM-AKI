@@ -1,5 +1,6 @@
 ---
 language: en
+license: apache-2.0
 tags:
 - medical
 - healthcare
@@ -11,7 +12,6 @@ tags:
 - timesfm
 - aki
 - nephrotoxicity
-license: apache-2.0
 datasets:
 - synthetic-ehr
 metrics:
@@ -19,63 +19,98 @@ metrics:
 - f1
 - precision
 - recall
+- sensitivity
+- specificity
+base_model: google/gemma-4-12b-it
+library_name: transformers
+pipeline_tag: text-generation
 ---
 
 # Agentic-TimesFM-AKI
 
-## Model Description
-**Agentic-TimesFM-AKI** is a specialized, agentic multi-modal framework designed for the continuous prediction of synergistic nephrotoxicity, specifically targeting acute kidney injury (AKI) induced by the concurrent administration of Vancomycin and Piperacillin-Tazobactam (Zosyn). 
+<div align="center">
 
-This model integrates a large language model (**Gemma-4 12B**) with a state-of-the-art time-series forecasting foundation model (**TimesFM 2.5**). It leverages the clinical reasoning capabilities of Gemma-4 alongside TimesFM's precise projection of longitudinal laboratory trends (e.g., serum creatinine) to achieve high precision and interpretability.
+### A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data
 
-## Model Architecture
-The framework operates on a dual-model architecture:
-1. **TimesFM 2.5 Agent**: Explicitly forecasts patient serum creatinine trajectories over a 72-hour window.
-2. **Gemma-4 12B (Instruction-Tuned)**: Receives the TimesFM projections, patient demographics, and medication histories. It acts as the orchestrator to synthesize the data and generate both a binary risk classification and a highly interpretable clinical warning summary.
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Agentic--TimesFM--AKI-blue?logo=github)](https://github.com/jamalesam93/Agentic-TimesFM-AKI)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## Training Data & Privacy
-The framework was trained exclusively on **differentially private synthetic EHR data**.
-- **Cohort Size:** 2,000 synthetic patient trajectories (823 AKI / 1177 Normal).
-- **Privacy Mechanism:** Laplace mechanism with a strict privacy budget of ε = 10, distributed across longitudinal laboratory trends (40%), hemodynamic parameters (35%), and static demographics (25%).
-- This ensures patient privacy (no PHI exposure) while retaining the critical multivariate distributions required for the LLM to learn the synergistic nephrotoxicity of the drugs.
+</div>
 
-## Evaluation Results
-The framework underwent rigorous internal validation on a real-world **eICU holdout cohort (N=200)**. It significantly outperformed traditional machine learning baselines:
+---
 
-| Metric | Point Estimate | 95% Confidence Interval |
+## 📌 Model Overview
+
+**Agentic-TimesFM-AKI** is a specialized, privacy-preserving multi-modal clinical framework designed for the continuous prediction of synergistic nephrotoxicity — specifically Acute Kidney Injury (AKI) induced by the concurrent administration of **Vancomycin** and **Piperacillin-Tazobactam (Zosyn)**.
+
+This repository hosts pre-trained weights, adapters, and quantized GGUF variants for the dual-model system, integrating:
+1. **Gemma-4 12B Sentinel** (QLoRA fine-tuned on synthetic clinical narratives).
+2. **TimesFM 2.5 Agent** (LoRA fine-tuned zero-shot time-series forecaster).
+
+---
+
+## 🏗️ Architecture & Functionality
+
+The system leverages a dual-agent orchestration framework:
+- **TimesFM 2.5 Forecast Engine:** Ingests longitudinal lab values (e.g., serum creatinine, BUN) and projects future 72-hour creatinine trajectories.
+- **Gemma-4 12B Clinical Sentinel:** Receives TimesFM's 72-hour projections alongside patient demographics and medication timelines to output a structured binary prediction (`AKI_POSITIVE` / `AKI_NEGATIVE`) and a natural language clinical warning.
+
+```text
+Patient EHR / Labs ──▶ TimesFM 2.5 Agent (72h Forecast)
+                              │
+                              ▼
+Patient Context ──────▶ Gemma-4 12B Sentinel ──▶ Binary Risk + Clinical Warning
+```
+
+---
+
+## 📊 Evaluation & Metrics
+
+The framework was trained exclusively on **differentially private synthetic data** ($\varepsilon = 10$) to preserve patient privacy and validated on a real-world **eICU holdout cohort (N=200)**:
+
+| Metric | Point Estimate | 95% Bootstrap Confidence Interval |
 | :--- | :---: | :---: |
-| **Accuracy** | 0.970 | 0.945 – 0.990 |
-| **Sensitivity (Recall)** | 0.944 | 0.892 – 0.988 |
-| **Specificity** | 0.991 | 0.971 – 1.000 |
-| **Precision** | 0.988 | 0.961 – 1.000 |
-| **F1-Score** | 0.966 | 0.934 – 0.989 |
+| **Accuracy** | **0.970** | 0.945 – 0.990 |
+| **Sensitivity (Recall)** | **0.944** | 0.892 – 0.988 |
+| **Specificity** | **0.991** | 0.971 – 1.000 |
+| **Precision** | **0.988** | 0.961 – 1.000 |
+| **F1-Score** | **0.966** | 0.934 – 0.989 |
 
-*Note: The system features "safe failure" modes. Even when the model yields a false negative due to label misalignment, it consistently generates an alarming, interpretable clinical warning to alert the physician.*
+### Performance Comparison vs. Baselines (eICU Holdout)
 
-## Limitations and Generalizability
-* **Formatting Fragility:** The model currently exhibits severe degradation when subjected to out-of-domain external validation (e.g., MIMIC-IV cohort, F1 collapsed to 0.421). It is highly susceptible to formatting fragility and structural schema shifts. 
-* **Deployment Warning:** This model requires strict schema harmonization and site-specific prompt calibration before deployment across disparate hospital networks.
-* **Token Limits:** Imposing strict generation limits (e.g., 100 tokens) can artificially truncate the agent's clinical reasoning chain, resulting in forced false negatives. Dynamic token allocation is recommended.
+- **Agentic-TimesFM-AKI (F1: 0.966)** significantly outperformed traditional baselines:
+  - Random Forest (F1: 0.752, $p < 0.001$)
+  - XGBoost (F1: 0.748, $p < 0.001$)
+  - Logistic Regression (F1: 0.700, $p < 0.001$)
 
-## Usage
-The repository provides:
-1. **`model.safetensors`**: The merged Gemma-4-12B model weights.
-2. **`gguf/`**: Quantized GGUF versions of the model for consumer hardware inference.
-3. **`llm_lora_adapter/` & `timesfm_lora_adapter/`**: The standalone adapters if you wish to apply them to your own base models.
+---
 
-### Quick Start (Pseudo-code)
+## ⚠️ Important Considerations & Limitations
+
+1. **Formatting Fragility (Domain Shift):** External validation on the MIMIC-IV demo cohort revealed performance degradation ($F1 = 0.421$) due to structural schema shifts. Prompt recalibration and strict schema harmonization are required before multi-center deployment.
+2. **Generation Token Allocations:** Truncating generation tokens (e.g., `< 100` tokens) prematurely cuts off the clinical reasoning chain, causing false negatives. Dynamic or high token limits ($\ge 250$ tokens) are recommended.
+3. **Clinical Scope:** Currently optimized specifically for Vancomycin + Piperacillin-Tazobactam synergistic risk assessment.
+
+---
+
+## 💻 Quick Start & Usage
+
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 
 model_id = "QinEmPeRoR93/Agentic-TimesFM-AKI"
 
-# Load the LLM Agent
 tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    torch_dtype=torch.bfloat16,
+    device_map="auto"
+)
 
 prompt = """<|turn>user
-Patient: 68yo, MAP: 75, Vanco Trough: 18mg/L, Zosyn: Active.
-TimesFM 72h Creatinine Projection: [1.2, 1.4, 1.9]
+Patient: 68yo male, MAP: 75 mmHg, Vancomycin Trough: 18 mg/L, Piperacillin-Tazobactam: Active.
+TimesFM 72h Serum Creatinine Projection: [1.2, 1.4, 1.9 mg/dL]
 Assess synergistic nephrotoxicity risk.
 <|turn>model
 """
@@ -85,6 +120,24 @@ outputs = model.generate(**inputs, max_new_tokens=250)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-## Citation
-If you use this model or framework, please cite the corresponding manuscript:
-*(Citation details pending publication).*
+---
+
+## ⚖️ Licensing & Terms
+
+- **Code & Model Weights:** Released under the [Apache 2.0 License](https://opensource.org/licenses/Apache-2.0).
+- **Base Model License:** Fine-tuned from Google's Gemma 4. Usage must conform with [Google Gemma Terms of Use](https://ai.google.dev/gemma/terms).
+
+---
+
+## 📄 Citation
+
+If you use this model or code in your work, please cite the corresponding paper:
+
+```bibtex
+@article{saka2026agentictimesfmaki,
+  title   = {Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data},
+  author  = {Saka, Jamal E.},
+  year    = {2026},
+  note    = {Manuscript under review}
+}
+```

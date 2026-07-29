@@ -123,16 +123,16 @@ def main():
     plt.ylim([0.0, 1.02])
     plt.xlabel('False Positive Rate', fontweight='bold')
     plt.ylabel('True Positive Rate', fontweight='bold')
-    plt.title('Figure 4: Receiver Operating Characteristic (ROC) Curve\nTraditional ML vs. Agentic LLM on Real-World Data', pad=20, fontweight='bold')
+    plt.title('Figure 3: Receiver Operating Characteristic (ROC) Curve\nTraditional ML vs. Agentic LLM on Real-World Data', pad=20, fontweight='bold')
     plt.legend(loc="lower right", frameon=True, framealpha=1, edgecolor='black')
     
-    out_dir = "reports/graphs"
+    out_dir = "Article/figures"
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "ml_baseline_roc.png")
+    out_path = os.path.join(out_dir, "Figure_3.png")
     
     plt.tight_layout()
     plt.savefig(out_path, dpi=600, bbox_inches='tight')
-    print(f"\nSaved ROC curve to {out_path}")
+    print(f"\nSaved high-res ROC curve to {out_path}")
     
     print("\n--- AUC Results ---")
     for name, score in auc_results.items():

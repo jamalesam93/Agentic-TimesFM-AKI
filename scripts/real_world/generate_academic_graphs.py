@@ -26,7 +26,7 @@ def generate_loss_curve(output_dir):
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(epochs, loss, marker='s', linestyle='-', color='#000000', linewidth=2, markersize=8, label='Training Loss')
     
-    ax.set_title('Figure 1: Fine-Tuning Convergence of TimesFM LoRA Adapter\n(Evaluation on Real-World HDHI Parameters)', pad=20, fontweight='bold')
+    ax.set_title('Supplementary Figure S1: Fine-Tuning Convergence of TimesFM LoRA Adapter\n(Evaluation on Real-World HDHI Parameters)', pad=20, fontweight='bold')
     ax.set_xlabel('Training Epoch')
     ax.set_ylabel('Mean Absolute Error (Proxy Loss)')
     ax.set_xticks(epochs)
@@ -41,9 +41,10 @@ def generate_loss_curve(output_dir):
         ax.annotate(f"{txt:.4f}", (epochs[i], loss[i]), textcoords="offset points", xytext=(0,12), ha='center', fontsize=11, fontweight='bold')
         
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, 'timesfm_loss_curve.png'), dpi=600, bbox_inches='tight')
+    out_path = os.path.join(output_dir, 'Supplementary_Figure_S1.png')
+    plt.savefig(out_path, dpi=600, bbox_inches='tight')
     plt.close()
-    print("Generated academic timesfm_loss_curve.png")
+    print(f"Generated academic {out_path}")
 
 def generate_confusion_matrix(output_dir):
     # TP=84, FP=1, FN=5, TN=110
@@ -60,17 +61,18 @@ def generate_confusion_matrix(output_dir):
                 cbar_kws={'label': 'Number of Trajectories'},
                 linewidths=1, linecolor='black', ax=ax)
     
-    ax.set_title('Figure 5: Gemma-4 12B Clinical Accuracy\nConfusion Matrix (n=200 Holdout)', pad=20, fontweight='bold')
+    ax.set_title('Figure 4: Gemma-4 12B Clinical Accuracy\nConfusion Matrix (n=200 Holdout)', pad=20, fontweight='bold')
     ax.set_xlabel('Predicted Clinical Diagnosis')
     ax.set_ylabel('Actual Ground-Truth Diagnosis')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, 'gemma_confusion_matrix.png'), dpi=600, bbox_inches='tight')
+    out_path = os.path.join(output_dir, 'Figure_4.png')
+    plt.savefig(out_path, dpi=600, bbox_inches='tight')
     plt.close()
-    print("Generated academic gemma_confusion_matrix.png")
+    print(f"Generated academic {out_path}")
 
 if __name__ == "__main__":
-    output_dir = "reports/graphs"
+    output_dir = "Article/figures"
     os.makedirs(output_dir, exist_ok=True)
     
     print("Generating academic graphs for PAPER...")

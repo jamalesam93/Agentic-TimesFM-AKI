@@ -21,10 +21,10 @@ metrics:
 - recall
 ---
 
-# Agentic-TimesFM-AKI-12B
+# Agentic-TimesFM-AKI
 
 ## Model Description
-**Agentic-TimesFM-AKI-12B** is a specialized, agentic multi-modal framework designed for the continuous prediction of synergistic nephrotoxicity, specifically targeting acute kidney injury (AKI) induced by the concurrent administration of Vancomycin and Piperacillin-Tazobactam (Zosyn). 
+**Agentic-TimesFM-AKI** is a specialized, agentic multi-modal framework designed for the continuous prediction of synergistic nephrotoxicity, specifically targeting acute kidney injury (AKI) induced by the concurrent administration of Vancomycin and Piperacillin-Tazobactam (Zosyn). 
 
 This model integrates a large language model (**Gemma-4 12B**) with a state-of-the-art time-series forecasting foundation model (**TimesFM 2.5**). It leverages the clinical reasoning capabilities of Gemma-4 alongside TimesFM's precise projection of longitudinal laboratory trends (e.g., serum creatinine) to achieve high precision and interpretability.
 
@@ -67,7 +67,7 @@ The repository provides:
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_id = "QinEmPeRoR93/Agentic-TimesFM-AKI-12B"
+model_id = "QinEmPeRoR93/Agentic-TimesFM-AKI"
 
 # Load the LLM Agent
 tokenizer = AutoTokenizer.from_pretrained(model_id)

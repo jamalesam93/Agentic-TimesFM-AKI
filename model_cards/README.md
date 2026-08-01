@@ -33,6 +33,7 @@ pipeline_tag: text-generation
 ### A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data
 
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Agentic--TimesFM--AKI-blue?logo=github)](https://github.com/jamalesam93/Agentic-TimesFM-AKI)
+[![medRxiv Preprint](https://img.shields.io/badge/medRxiv-10.64898%2F2026.07.30.26359271-008080.svg)](https://www.medrxiv.org/content/10.64898/2026.07.30.26359271v1)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 </div>
@@ -134,10 +135,12 @@ print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 If you use this model or code in your work, please cite the corresponding paper:
 
 ```bibtex
-@article{saka2026agentictimesfmaki,
+@article{alsakkaf2026agentictimesfmaki,
   title   = {Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data},
-  author  = {Saka, Jamal E.},
+  author  = {Alsakkaf, Gamal Esam Ahmed},
+  journal = {medRxiv},
   year    = {2026},
-  note    = {Manuscript under review}
+  doi     = {10.64898/2026.07.30.26359271},
+  url     = {https://www.medrxiv.org/content/10.64898/2026.07.30.26359271v1}
 }
 ```

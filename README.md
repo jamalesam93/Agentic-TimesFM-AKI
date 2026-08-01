@@ -7,7 +7,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![HuggingFace Model](https://img.shields.io/badge/%F0%9F%A4%97-Model_Hub-yellow.svg)](https://huggingface.co/QinEmPeRoR93/Agentic-TimesFM-AKI)
-[![arXiv](https://img.shields.io/badge/arXiv-Preprint-b31b1b.svg)](https://arxiv.org/)
+[![medRxiv Preprint](https://img.shields.io/badge/medRxiv-10.64898%2F2026.07.30.26359271-008080.svg)](https://www.medrxiv.org/content/10.64898/2026.07.30.26359271v1)
 
 </div>
 
@@ -20,7 +20,7 @@
 The framework is trained exclusively on **differentially private synthetic EHR data** (ε = 10), ensuring zero exposure to Protected Health Information (PHI), and was rigorously validated on real-world holdout cohorts from the publicly accessible **eICU** and **MIMIC-IV** demo databases.
 
 > [!NOTE]
-> This repository accompanies the manuscript: *"Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data"* — Alsakkaf, G. E. (2026).
+> This repository accompanies the medRxiv preprint: *"Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data"* — Alsakkaf, G. E. A. (2026). medRxiv: [https://www.medrxiv.org/content/10.64898/2026.07.30.26359271v1](https://www.medrxiv.org/content/10.64898/2026.07.30.26359271v1).
 
 ---
 
@@ -267,12 +267,14 @@ Scaling to the complete eICU and MIMIC-IV databases requires separate credential
 If you use this framework, code, or model weights in your research, please cite:
 
 ```bibtex
-@article{saka2026agentictimesfmaki,
+@article{alsakkaf2026agentictimesfmaki,
   title   = {Agentic-TimesFM-AKI: A Dual LLM–Time Series Framework for Predicting 
              Drug-Induced Acute Kidney Injury with Privacy-Preserving Synthetic Data},
-  author  = {Alsakkaf, Gamal E.},
+  author  = {Alsakkaf, Gamal Esam Ahmed},
+  journal = {medRxiv},
   year    = {2026},
-  note    = {Manuscript under review}
+  doi     = {10.64898/2026.07.30.26359271},
+  url     = {https://www.medrxiv.org/content/10.64898/2026.07.30.26359271v1}
 }
 ```
 
